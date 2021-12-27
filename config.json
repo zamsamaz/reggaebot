@@ -1,0 +1,11 @@
+{
+  "maximum_moisture": 100,
+  "pump__pin_1": 10,
+  "pump_pin_2": 20,
+  "moisture_pin_1": 20,
+  "moisture__pin_2": 20,
+  "tds_pin_1": 20,
+  "tds_pin_2": 20,
+  "tds_tank_pin" : 20,
+  "initial_date" : 20,
+}
