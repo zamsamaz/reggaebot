@@ -8,7 +8,12 @@ from datetime import datetime, timedelta
 
 config = open('config.json',mode='r')
 config = json.load(config)
+
+init_date = config['init_date']
+init_date = datetime.strptime(init_date, '%b %d %Y %I:%M%p')
 maximum_moisture = config['maximum_moisture']
+
+
 maximum_tds = get_maximum_tds()
 unit_list = [1,2,3,4,5,6,7,8,9]
 
@@ -71,7 +76,7 @@ def unit_moist_mon(unit_list, maximum_tds):
             feed(unit_list[i], maximum_tds)
 
 def get_week_by_date(date_now):
-    initial_date = config["initial_date"]
+    #arrumar
     delta = date_now = initial_date
     return delta
 

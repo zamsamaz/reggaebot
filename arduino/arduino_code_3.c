@@ -1,0 +1,76 @@
+//Este arduino eh responsavel por:
+// Vaso 9: Sensor TDS (pino A0) e Sensor de umidade  (pino A1)
+// Tanque: Sensor TDS (pino A2) e Sensor de pH (pino A3)
+// as infos sao mandadas via serial
+
+//Este arduino eh responsavel por:
+// Vaso 9: Sensor TDS (pino A0) e Sensor de umidade (pino A1)
+// Tanque: Sensor TDS (pino A2) e Sensor de pH (pino A3)
+// as infos sao mandadas via serial no formato de um python dict (JSON)
+// exemplo: { 'vaso_9': { 'tds': [0-1023], 'umidade': [0-1023]}, 'tanque': { 'tds': [0-1023], 'pH': [0-1023]} }
+
+#include "libs/GravityTDS.h"
+ 
+#define TdsSensorPin0 A0
+#define TdsSensorPin1 A2
+
+#define MoistSensorPin0 A1
+
+#define pHSensorPin0 A3
+
+GravityTDS gravityTds0;
+GravityTDS gravityTds1;
+
+int MoistSensorValue0; 
+
+float temperature = 25,tdsValue = 0;
+ 
+void setup()
+{
+    Serial.begin(115200);
+
+    gravityTds0.setPin(TdsSensorPin0);
+    gravityTds1.setPin(TdsSensorPin1);
+
+    gravityTds0.setAref(5.0);  //reference voltage on ADC, default 5.0V on Arduino UNO
+    gravityTds1.setAref(5.0);  //reference voltage on ADC, default 5.0V on Arduino UNO
+
+    gravityTds0.setAdcRange(1024);  //1024 for 10bit ADC;4096 for 12bit ADC
+    gravityTds1.setAdcRange(1024);  //1024 for 10bit ADC;4096 for 12bit ADC
+
+    gravityTds0.begin();  //initialization
+    gravityTds1.begin();  //initialization
+
+}
+ 
+void loop()
+{
+    //temperature = readTemperature();  //add your temperature sensor and read it
+    gravityTds0.setTemperature(temperature);  // set the temperature and execute temperature compensation
+    gravityTds1.setTemperature(temperature);  // set the temperature and execute
+
+    gravityTds0.update();  //sample and calculate
+    gravityTds1.update();  //sample and calculate
+
+    tdsValue0 = gravityTds0.getTdsValue();  // then get the value
+    tdsValue1 = gravityTds1.getTdsValue();  // then get the value
+
+    MoistSensorValue0 = analogRead(MoistSensorPin0); 
+
+    pHSensorValue0 = analogRead(pHSensorPin0);
+
+    Serial.print("{\"vaso_9\": { \"tds\": \"");
+    Serial.print(tdsValue0);
+    Serial.print("\", \"umidade\": \"");
+    Serial.print(MoistSensorValue0);
+    Serial.println("\"}, {\"tanque\": { \"tds\": \"");
+    Serial.print(tdsValue1);
+    Serial.print("\", \"pH\": \"");
+    Serial.print(pHSensorValue0);
+    Serial.println("\"} }");
+    delay(1000);
+
+}
+
+
+
