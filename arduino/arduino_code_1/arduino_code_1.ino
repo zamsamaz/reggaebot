@@ -1,12 +1,3 @@
-#include <EEPROM.h>
-
-#include <OneWire.h>
-
-#include <DallasTemperature.h>
-
-#include "GravityTDS.h" 
-
-
 //Este arduino eh responsavel por:
 // Vaso 1: Sensor TDS (pino A0) e Sensor de umidade (pino A1)
 // Vaso 2: Sensor TDS (pino A2) e Sensor de umidade (pino A3)
@@ -16,6 +7,14 @@
 // as infos sao mandadas via serial no formato de um python dict (JSON)
 // exemplo: { 'vaso_1': { 'tds': [0-1023], 'umidade': [0-1023]}, 'vaso_2': { 'tds': [0-1023], 'umidade': [0-1023]}, ... }
 
+
+#include <EEPROM.h>
+
+#include <OneWire.h>
+
+#include <DallasTemperature.h>
+
+#include "GravityTDS.h" 
 
 
 #define TdsSensorPin0 19//a0

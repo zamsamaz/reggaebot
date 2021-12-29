@@ -1,12 +1,9 @@
-//Este arduino eh responsavel por:
-// Vaso 9: Sensor TDS (pino A0) e Sensor de umidade  (pino A1)
-// Tanque: Sensor TDS (pino A2) e Sensor de pH (pino A3)
-// Sensor de temperatura de agua (pino D4)
-// as infos sao mandadas via serial
 
 //Este arduino eh responsavel por:
 // Vaso 9: Sensor TDS (pino A0) e Sensor de umidade (pino A1)
 // Tanque: Sensor TDS (pino A2) e Sensor de pH (pino A3)
+// Temperatura dos vasos (pino D12)
+// Temperatura do tanque (pin A4)
 // as infos sao mandadas via serial no formato de um python dict (JSON)
 // exemplo: { 'vaso_9': { 'tds': [0-1023], 'umidade': [0-1023]}, 'tanque': { 'tds': [0-1023], 'pH': [0-1023]} }
 
@@ -26,6 +23,9 @@
 #define pHSensorPin0 22//A3
 
 #define ONE_WIRE_BUS 15//D12
+
+#define pHTempSensorPin0 23//A4
+
 
 
 GravityTDS gravityTds0;
@@ -77,6 +77,7 @@ void loop()
     MoistSensorValue0 = analogRead(MoistSensorPin0);
 
     int pHSensorValue0 = analogRead(pHSensorPin0);
+    int pHTempSensorValue0 = analogRead(pHTempSensorPin0);
 
     if (Serial.available() > 0) {
       String data = Serial.readStringUntil('\n');
@@ -89,6 +90,8 @@ void loop()
           Serial.print(tdsValue1);
           Serial.print("\", \"pH\": \"");
           Serial.print(pHSensorValue0);
+          Serial.print("\", \"temp\": \"");
+          Serial.print(pHTempSensorValue0);          
           Serial.println("\"} }");
         }
     delay(1000);

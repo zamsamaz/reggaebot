@@ -3,7 +3,7 @@
 // Vaso 6: Sensor TDS (pino A2) e Sensor de umidade (pino A3)
 // Vaso 7: Sensor TDS (pino A4) e Sensor de umidade (pino A5)
 // Vaso 8: Sensor TDS (pino A6) e Sensor de umidade (pino A7)
-// Sensor de temperatura de agua (pino D4)
+// Sensor de temperatura de agua (pino D12)
 // as infos sao mandadas via serial no formato de um python dict (JSON)
 // exemplo: { 'vaso_1': { 'tds': [0-1023], 'umidade': [0-1023]}, 'vaso_2': { 'tds': [0-1023], 'umidade': [0-1023]}, ... }
 
