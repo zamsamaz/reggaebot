@@ -7,19 +7,26 @@
 // as infos sao mandadas via serial no formato de um python dict (JSON)
 // exemplo: { 'vaso_1': { 'tds': [0-1023], 'umidade': [0-1023]}, 'vaso_2': { 'tds': [0-1023], 'umidade': [0-1023]}, ... }
 
-#include "libs/GravityTDS.h"
+#include <EEPROM.h>
 
-#define TdsSensorPin0 A0
-#define TdsSensorPin1 A2
-#define TdsSensorPin2 A4
-#define TdsSensorPin3 A6
+#include <OneWire.h>
 
-#define MoistSensorPin0 A1
-#define MoistSensorPin1 A3
-#define MoistSensorPin2 A5
-#define MoistSensorPin3 A7
+#include <DallasTemperature.h>
 
-#define ONE_WIRE_BUS D12
+#include "GravityTDS.h" 
+
+
+#define TdsSensorPin0 19//a0
+#define TdsSensorPin1 21//a2
+#define TdsSensorPin2 23//A4
+#define TdsSensorPin3 25//A6
+
+#define MoistSensorPin0 20//A1
+#define MoistSensorPin1 22//A3
+#define MoistSensorPin2 24//A5
+#define MoistSensorPin3 26//A7
+
+#define ONE_WIRE_BUS 15//D12
 
 GravityTDS gravityTds0;
 GravityTDS gravityTds1;
@@ -71,7 +78,7 @@ void loop()
 {
     //temperature = readTemperature();  //add your temperature sensor and read it
     sensors.requestTemperatures();
-    float temperature = sensors.getTempCByIndex(0)
+    float temperature = sensors.getTempCByIndex(0);
 
 
     gravityTds0.setTemperature(temperature);  // set the temperature and execute temperature compensation
@@ -84,10 +91,10 @@ void loop()
     gravityTds2.update();  //sample and calculate
     gravityTds3.update();  //sample and calculate
 
-    tdsValue0 = gravityTds0.getTdsValue();  // then get the value
-    tdsValue1 = gravityTds1.getTdsValue();  // then get the value
-    tdsValue2 = gravityTds2.getTdsValue();  // then get the value
-    tdsValue3 = gravityTds3.getTdsValue();  // then get the value
+    float tdsValue0 = gravityTds0.getTdsValue();  // then get the value
+    float tdsValue1 = gravityTds1.getTdsValue();  // then get the value
+    float tdsValue2 = gravityTds2.getTdsValue();  // then get the value
+    float tdsValue3 = gravityTds3.getTdsValue();  // then get the value
 
     MoistSensorValue0 = analogRead(MoistSensorPin0);
     MoistSensorValue1 = analogRead(MoistSensorPin1);
@@ -114,7 +121,7 @@ void loop()
           Serial.print(tdsValue3);
           Serial.print("\", \"umidade\": \"");
           Serial.print(MoistSensorValue3);
-          Serial.println("\"} }")
+          Serial.println("\"} }");
         }
     delay(1000);
     }

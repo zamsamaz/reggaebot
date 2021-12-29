@@ -1,5 +1,6 @@
 import RPi.GPIO as gpio
-import time, datetime
+from time import sleep
+from datetime import datetime
 import json
 from greenutils import GHMicroGrowChart as GH
 import serial
@@ -65,9 +66,9 @@ pino_rele_peristaltica_phdown = 29
 gpio.setup(pino_rele_peristaltica_phdown, gpio.OUT)
 
 
-ser0 = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-ser1 = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
-ser2 = serial.Serial('/dev/ttyACM02', 9600, timeout=1)
+ser0 = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+ser1 = serial.Serial('/dev/ttyUSB1', 9600, timeout=1)
+ser2 = serial.Serial('/dev/ttyUSB2', 9600, timeout=1)
 
 
 def get_sensor_data():
@@ -314,16 +315,19 @@ def callback_tanque_vazio(pino_sensor_inferior_nivel):
     gpio.output(pino_solenoide, HIGH)
 
 
-gpio.add_event_detect(pino_sensor_inferior_nivel, gpio.LOW, bouncetime=300)
+gpio.add_event_detect(pino_sensor_inferior_nivel, gpio.FALLING, bouncetime=300)
 gpio.add_event_callback(pino_sensor_inferior_nivel, callback_tanque_vazio)
 
-gpio.add_event_detect(pino_sensor_superior_nivel, gpio.HIGH, bouncetime=300)
+gpio.add_event_detect(pino_sensor_superior_nivel, gpio.RISING, bouncetime=300)
 gpio.add_event_callback(pino_sensor_superior_nivel, callback_tanque_cheio)
 
 
 while True:
-    tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
-    fila = atualiza_fila_de_alimentacao(umidade_list)
-    week = get_current_week()
-    alimenta(fila, week)
-    sleep(60*10)
+    try:
+        tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
+        fila = atualiza_fila_de_alimentacao(umidade_list)
+        week = get_current_week()
+        alimenta(fila, week)
+        sleep(60*10)
+    except:
+        continue

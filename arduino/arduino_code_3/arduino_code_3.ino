@@ -10,16 +10,22 @@
 // as infos sao mandadas via serial no formato de um python dict (JSON)
 // exemplo: { 'vaso_9': { 'tds': [0-1023], 'umidade': [0-1023]}, 'tanque': { 'tds': [0-1023], 'pH': [0-1023]} }
 
-#include "libs/GravityTDS.h"
+#include <EEPROM.h>
 
-#define TdsSensorPin0 A0
-#define TdsSensorPin1 A2
+#include <OneWire.h>
 
-#define MoistSensorPin0 A1
+#include <DallasTemperature.h>
 
-#define pHSensorPin0 A3
+#include "GravityTDS.h" 
 
-#define ONE_WIRE_BUS D12
+#define TdsSensorPin0 19//A0
+#define TdsSensorPin1 21//A2
+
+#define MoistSensorPin0 20//A1
+
+#define pHSensorPin0 22//A3
+
+#define ONE_WIRE_BUS 15//D12
 
 
 GravityTDS gravityTds0;
@@ -57,7 +63,7 @@ void loop()
 {
     //temperature = readTemperature();  //add your temperature sensor and read it
     sensors.requestTemperatures();
-    float temperature = sensors.getTempCByIndex(0)
+    float temperature = sensors.getTempCByIndex(0);
 
     gravityTds0.setTemperature(temperature);  // set the temperature and execute temperature compensation
     gravityTds1.setTemperature(temperature);  // set the temperature and execute
@@ -65,12 +71,12 @@ void loop()
     gravityTds0.update();  //sample and calculate
     gravityTds1.update();  //sample and calculate
 
-    tdsValue0 = gravityTds0.getTdsValue();  // then get the value
-    tdsValue1 = gravityTds1.getTdsValue();  // then get the value
+    float tdsValue0 = gravityTds0.getTdsValue();  // then get the value
+    float tdsValue1 = gravityTds1.getTdsValue();  // then get the value
 
     MoistSensorValue0 = analogRead(MoistSensorPin0);
 
-    pHSensorValue0 = analogRead(pHSensorPin0);
+    int pHSensorValue0 = analogRead(pHSensorPin0);
 
     if (Serial.available() > 0) {
       String data = Serial.readStringUntil('\n');
