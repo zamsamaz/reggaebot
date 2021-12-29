@@ -13,7 +13,7 @@ class Getters:
         try:
             growchart = pd.read_pickle("agressive_feed_growchart.pkl") #test if one of dfs exist
         except IOError:
-            import grow_chart_raw_data_to_df #creates the dataframes if exception is raised
+            from greenutils import gh_micro_grow_chart_raw_data_to_df #creates the dataframes if exception is raised
 
         if feeding_regime == "agressive":
             return pd.read_pickle("agressive_feed_growchart.pkl")
@@ -46,7 +46,7 @@ class Getters:
         adjusted_quantities["FloraGro (ml/l)"] = floragro
         adjusted_quantities["FloraBloom (ml/l)"] = florabloom
 
-        adjusted_quantities["FloraMicro (ml/"+str(tank_capacity)+"l)"] = adjusted_quantities.pop("FloraMicro (ml/l)")
-        adjusted_quantities["FloraGro (ml/"+str(tank_capacity)+"l)"] = adjusted_quantities.pop("FloraGro (ml/l)")
-        adjusted_quantities["FloraBloom (ml/"+str(tank_capacity)+"l)"] = adjusted_quantities.pop("FloraBloom (ml/l)")
+        adjusted_quantities["FloraMicro"] = adjusted_quantities.pop("FloraMicro (ml/l)")
+        adjusted_quantities["FloraGro"] = adjusted_quantities.pop("FloraGro (ml/l)")
+        adjusted_quantities["FloraBloom"] = adjusted_quantities.pop("FloraBloom (ml/l)")
         return adjusted_quantities
