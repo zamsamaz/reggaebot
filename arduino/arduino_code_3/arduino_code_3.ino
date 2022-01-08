@@ -9,7 +9,7 @@
 
 #include <EEPROM.h>
 
-#include "GravityTDS.h" 
+#include "GravityTDS.h"
 
 #define TdsSensorPin0 A0
 #define TdsSensorPin1 A2
@@ -68,8 +68,8 @@ void loop()
 
     if (Serial.available() > 0) {
       String data = Serial.readStringUntil('\n');
-      if (data == "1"){;
-          Serial.print("{\"vaso_9\": { \"tds\": \"");
+      if (data == "sendit"){;
+          Serial.print("3-{\"vaso_9\": { \"tds\": \"");
           Serial.print(tdsValue0);
           Serial.print("\", \"umidade\": \"");
           Serial.print(MoistSensorValue0);
@@ -78,7 +78,7 @@ void loop()
           Serial.print("\", \"pH\": \"");
           Serial.print(pHSensorValue0);
           Serial.print("\", \"temp\": \"");
-          Serial.print(pHTempSensorValue0);          
+          Serial.print(pHTempSensorValue0);
           Serial.println("\"} }");
         }
     //delay(1000);

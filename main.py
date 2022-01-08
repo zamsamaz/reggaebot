@@ -87,12 +87,37 @@ def get_sensor_data():
 
     if ser0.in_waiting > 0:
         line0 = ser0.readline().decode('utf-8').rstrip()
-        full_json = full_json+line0
+        order_of_line0_in_json = line0[:1]
+        line0 = line0[2:]
     if ser1.in_waiting > 0:
         line1 = ser1.readline().decode('utf-8').rstrip()
-        full_json = full_json+line1
+        order_of_line1_in_json = line1[:1]
+        line1 = line1[2:]
     if ser2.in_waiting > 0:
         line2 = ser2.readline().decode('utf-8').rstrip()
+        order_of_line2_in_json = line2[:1]
+        line2 = line2[2:]
+
+    if order_of_line0_in_json == "1":
+        full_json = full_json+line0
+    if order_of_line1_in_json == "1":
+        full_json = full_json+line1
+    if order_of_line2_in_json == "1":
+        full_json = full_json+line2
+
+    if order_of_line0_in_json == "2":
+        full_json = full_json+line0
+    if order_of_line1_in_json == "2":
+        full_json = full_json+line1
+    if order_of_line2_in_json == "2":
+        full_json = full_json+line2
+
+
+    if order_of_line0_in_json == "3":
+        full_json = full_json+line0
+    if order_of_line1_in_json == "3":
+        full_json = full_json+line1
+    if order_of_line2_in_json == "3":
         full_json = full_json+line2
 
     full_json = json.loads(full_json)
