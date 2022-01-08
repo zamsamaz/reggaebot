@@ -9,24 +9,18 @@
 
 #include <EEPROM.h>
 
-#include <OneWire.h>
-
-#include <DallasTemperature.h>
-
 #include "GravityTDS.h" 
 
 
-#define TdsSensorPin0 19//a0
-#define TdsSensorPin1 21//a2
-#define TdsSensorPin2 23//A4
-#define TdsSensorPin3 25//A6
+#define TdsSensorPin0 A0
+#define TdsSensorPin1 A2
+#define TdsSensorPin2 A4
+#define TdsSensorPin3 A6
 
-#define MoistSensorPin0 20//A1
-#define MoistSensorPin1 22//A3
-#define MoistSensorPin2 24//A5
-#define MoistSensorPin3 26//A7
-
-#define ONE_WIRE_BUS 15//D12
+#define MoistSensorPin0 A1
+#define MoistSensorPin1 A3
+#define MoistSensorPin2 A5
+#define MoistSensorPin3 A7
 
 GravityTDS gravityTds0;
 GravityTDS gravityTds1;
@@ -38,18 +32,10 @@ int MoistSensorValue1;
 int MoistSensorValue2;
 int MoistSensorValue3;
 
-// Setup a oneWire instance to communicate with any OneWire device
-OneWire oneWire(ONE_WIRE_BUS);
-
-// Pass oneWire reference to DallasTemperature library
-DallasTemperature sensors(&oneWire);
-
 
 void setup()
 {
     Serial.begin(115200);
-    sensors.begin();	// Start up the library
-
 
     gravityTds0.setPin(TdsSensorPin0);
     gravityTds1.setPin(TdsSensorPin1);
@@ -77,9 +63,7 @@ void setup()
 void loop()
 {
     //temperature = readTemperature();  //add your temperature sensor and read it
-    sensors.requestTemperatures();
-    float temperature = sensors.getTempCByIndex(0);
-
+    float temperature = 25;
 
     gravityTds0.setTemperature(temperature);  // set the temperature and execute temperature compensation
     gravityTds1.setTemperature(temperature);  // set the temperature and execute
@@ -105,7 +89,7 @@ void loop()
     if (Serial.available() > 0) {
       String data = Serial.readStringUntil('\n');
       if (data == "sendit"){;
-          Serial.print("{\"vaso_5\": { \"tds\": \"");
+          Serial.print("2-{\"vaso_5\": { \"tds\": \"");
           Serial.print(tdsValue0);
           Serial.print("\", \"umidade\": \"");
           Serial.print(MoistSensorValue0);
@@ -113,7 +97,7 @@ void loop()
           Serial.print(tdsValue1);
           Serial.print("\", \"umidade\": \"");
           Serial.print(MoistSensorValue1);
-          Serial.println("\"}, {\"vaso_7\": { '\"tds\": \"");
+          Serial.println("\"}, {\"vaso_7\": { \"tds\": \"");
           Serial.print(tdsValue2);
           Serial.print("\", \"umidade\": \"");
           Serial.print(MoistSensorValue2);

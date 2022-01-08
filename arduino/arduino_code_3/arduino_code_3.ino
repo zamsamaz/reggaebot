@@ -9,40 +9,29 @@
 
 #include <EEPROM.h>
 
-#include <OneWire.h>
-
-#include <DallasTemperature.h>
-
 #include "GravityTDS.h" 
 
-#define TdsSensorPin0 19//A0
-#define TdsSensorPin1 21//A2
+#define TdsSensorPin0 A0
+#define TdsSensorPin1 A2
 
-#define MoistSensorPin0 20//A1
+#define MoistSensorPin0 A1
 
-#define pHSensorPin0 22//A3
+#define pHSensorPin0 A3
 
-#define ONE_WIRE_BUS 15//D12
-
-#define pHTempSensorPin0 23//A4
-
-
+#define pHTempSensorPin0 A4
 
 GravityTDS gravityTds0;
 GravityTDS gravityTds1;
 
 int MoistSensorValue0;
 
-// Setup a oneWire instance to communicate with any OneWire device
-OneWire oneWire(ONE_WIRE_BUS);
-
-// Pass oneWire reference to DallasTemperature library
-DallasTemperature sensors(&oneWire);
 
 void setup()
 {
     Serial.begin(115200);
-    sensors.begin();	// Start up the library
+
+        pinMode(pHSensorPin0,INPUT);
+        pinMode(pHTempSensorPin0,INPUT);
 
 
     gravityTds0.setPin(TdsSensorPin0);
@@ -61,9 +50,7 @@ void setup()
 
 void loop()
 {
-    //temperature = readTemperature();  //add your temperature sensor and read it
-    sensors.requestTemperatures();
-    float temperature = sensors.getTempCByIndex(0);
+    float temperature = 26;
 
     gravityTds0.setTemperature(temperature);  // set the temperature and execute temperature compensation
     gravityTds1.setTemperature(temperature);  // set the temperature and execute
@@ -81,7 +68,7 @@ void loop()
 
     if (Serial.available() > 0) {
       String data = Serial.readStringUntil('\n');
-      if (data == "sendit"){;
+      if (data == "1"){;
           Serial.print("{\"vaso_9\": { \"tds\": \"");
           Serial.print(tdsValue0);
           Serial.print("\", \"umidade\": \"");
@@ -94,6 +81,6 @@ void loop()
           Serial.print(pHTempSensorValue0);          
           Serial.println("\"} }");
         }
-    delay(1000);
+    //delay(1000);
     }
 }
