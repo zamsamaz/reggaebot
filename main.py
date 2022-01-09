@@ -73,7 +73,7 @@ print("pinos setados")
 print("setup feito")
 
 def get_sensor_data():
-    
+
     print("obtendo dados de sensores")
     full_json = ""
     print("setando serial")
@@ -83,7 +83,7 @@ def get_sensor_data():
     ser2 = serial.Serial('/dev/ttyUSB2', 115200, timeout=0.1)
 
     print("serial setada")
-    
+
     ser0.reset_input_buffer()
     ser1.reset_input_buffer()
     ser2.reset_input_buffer()
@@ -226,7 +226,7 @@ def alimenta(fila, week):
     todays_nutes = growchart_getter.get_nutrient_parameters_by_week_and_feeding_regime(week, "medium")
     todays_tds = (float(todays_nutes["PPM range (500 scale)"].split('-')[0])+float(todays_nutes["PPM range (500 scale)"].split('-')[1]))/2
     print("nutrientes do dia calculados")
-    
+
     for vaso in fila:
         print("alimentando vaso: ", vaso)
         if tanque_vazio == False:
@@ -339,7 +339,7 @@ def alimenta(fila, week):
                 gpio.output(pino_rele_peristaltica_gro, gpio.HIGH)
                 sleep(proportion_gro*0.1)
                 gpio.output(pino_rele_peristaltica_gro, gpio.LOW)
-                
+
                 print("adding micro")
                 gpio.output(pino_rele_peristaltica_micro, gpio.HIGH)
                 sleep(proportion_micro*0.1)
@@ -349,12 +349,12 @@ def alimenta(fila, week):
 
             print("ajustados nutes")
             while not 420 < tanque_pH < 428:
-                
+
                 print("ajustando ph")
                 print("ph do tanque: " , tanque_ph)
                 print("ph ideal: " , ph_ideal)
 
-                
+
                 if tanque_pH < ph_ideal:
                     gpio.output(pino_rele_peristaltica_phup, gpio.HIGH)
                     sleep(0.1)
@@ -423,7 +423,7 @@ while True:
         print("000- fila : ", fila)
         week = get_current_week()
         alimenta(fila, week)
-        
+
         sleep(60*10)
         print("000- aguardando um pouco")
     except:

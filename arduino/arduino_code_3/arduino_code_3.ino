@@ -69,17 +69,17 @@ void loop()
     if (Serial.available() > 0) {
       String data = Serial.readStringUntil('\n');
       if (data == "sendit"){;
-          Serial.print("3-{\"vaso_9\": { \"tds\": \"");
+          Serial.print("3-\"vaso_9\":{\"tds\":\"");
           Serial.print(tdsValue0);
-          Serial.print("\", \"umidade\": \"");
+          Serial.print("\",\"umidade\":\"");
           Serial.print(MoistSensorValue0);
-          Serial.println("\"}, {\"tanque\": { \"tds\": \"");
+          Serial.print("\"},\"tanque\":{\"tds\":\"");
           Serial.print(tdsValue1);
-          Serial.print("\", \"pH\": \"");
+          Serial.print("\",\"pH\":\"");
           Serial.print(pHSensorValue0);
-          Serial.print("\", \"temp\": \"");
+          Serial.print("\",\"temp\":\"");
           Serial.print(pHTempSensorValue0);
-          Serial.println("\"} }");
+          Serial.print("\"}}");
         }
     //delay(1000);
     }

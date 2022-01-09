@@ -9,7 +9,7 @@
 
 #include <EEPROM.h>
 
-#include "GravityTDS.h" 
+#include "GravityTDS.h"
 
 
 #define TdsSensorPin0 A0
@@ -89,25 +89,24 @@ void loop()
     if (Serial.available() > 0) {
       String data = Serial.readStringUntil('\n');
       if (data == "sendit"){;
-          Serial.print("2-{\"vaso_5\": { \"tds\": \"");
+          Serial.print("2-\"vaso_5\":{\"tds\":\"");
           Serial.print(tdsValue0);
-          Serial.print("\", \"umidade\": \"");
+          Serial.print("\",\"umidade\":\"");
           Serial.print(MoistSensorValue0);
-          Serial.println("\"}, {\"vaso_6\": { \"tds\": \"");
+          Serial.print("\"},\"vaso_6\":{\"tds\":\"");
           Serial.print(tdsValue1);
-          Serial.print("\", \"umidade\": \"");
+          Serial.print("\",\"umidade\":\"");
           Serial.print(MoistSensorValue1);
-          Serial.println("\"}, {\"vaso_7\": { \"tds\": \"");
+          Serial.print("\"},\"vaso_7\":{\"tds\":\"");
           Serial.print(tdsValue2);
-          Serial.print("\", \"umidade\": \"");
+          Serial.print("\",\"umidade\":\"");
           Serial.print(MoistSensorValue2);
-          Serial.println("\"}, {\"vaso_8\": { \"tds\": \"");
+          Serial.print("\"},\"vaso_8\":{\"tds\":\"");
           Serial.print(tdsValue3);
-          Serial.print("\", \"umidade\": \"");
+          Serial.print("\",\"umidade\":\"");
           Serial.print(MoistSensorValue3);
-          Serial.println("\"} }");
+          Serial.print("\",");
         }
-    delay(1000);
     }
 
 }
