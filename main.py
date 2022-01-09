@@ -1,11 +1,15 @@
+#-*- coding: utf-8 -*-
+
 import RPi.GPIO as gpio
 from time import sleep
 from datetime import datetime
 import json
 from greenutils import GHMicroGrowChart as GH
 import serial
+import sys
 
-
+print("começando o setup")
+print("fetchando arquivo de config")
 config = open('config.json',mode='r')
 config = json.load(config)
 init_date = config['init_date']
@@ -14,7 +18,8 @@ init_date = datetime.strptime(init_date, '%b %d %Y %I:%M%p')
 minimum_moisture = int(config['minimum_moisture'])
 tanque_vazio = False
 vazao_peristaltica = 0.666 # 0.666 ml/s
-
+print("config lida")
+print("setando pinos")
 gpio.setmode(gpio.BOARD)
 
 # SETUP DO PINO DO SENSOR SUPERIOR DE NIVEL DO TANQUE
@@ -64,37 +69,54 @@ pino_rele_peristaltica_phup = 15
 gpio.setup(pino_rele_peristaltica_phup, gpio.OUT)
 pino_rele_peristaltica_phdown = 29
 gpio.setup(pino_rele_peristaltica_phdown, gpio.OUT)
-
-
-ser0 = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-ser1 = serial.Serial('/dev/ttyUSB1', 9600, timeout=1)
-ser2 = serial.Serial('/dev/ttyUSB2', 9600, timeout=1)
-
+print("pinos setados")
+print("setup feito")
 
 def get_sensor_data():
-
+    
+    print("obtendo dados de sensores")
     full_json = ""
+    print("setando serial")
 
+    ser0 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0.1)
+    ser1 = serial.Serial('/dev/ttyUSB1', 115200, timeout=0.1)
+    ser2 = serial.Serial('/dev/ttyUSB2', 115200, timeout=0.1)
+
+    print("serial setada")
+    
     ser0.reset_input_buffer()
     ser1.reset_input_buffer()
     ser2.reset_input_buffer()
 
-    ser0.write(b"sendit\n")
-    ser1.write(b"sendit\n")
-    ser2.write(b"sendit\n")
-
-    sleep(5)
-
-    if ser0.in_waiting > 0:
-        line0 = ser0.readline().decode('utf-8').rstrip()
+    while ser0.in_waiting == 0:
+        ser0.write(b"sendit\n")
+        print("enviada serial 1")
+        sleep(0.5)
+    else:
+        line0 = ser0.readall().decode('utf-8').rstrip()
+        print("resposta serial 1: ", line0)
         order_of_line0_in_json = line0[:1]
         line0 = line0[2:]
-    if ser1.in_waiting > 0:
-        line1 = ser1.readline().decode('utf-8').rstrip()
+
+
+    while ser1.in_waiting == 0:
+        ser1.write(b"sendit\n")
+        print("enviada serial 2")
+        sleep(0.5)
+    else:
+        line1 = ser1.readall().decode('utf-8').rstrip()
+        print("resposta serial 2: ", line1)
         order_of_line1_in_json = line1[:1]
         line1 = line1[2:]
-    if ser2.in_waiting > 0:
-        line2 = ser2.readline().decode('utf-8').rstrip()
+
+
+    while ser2.in_waiting == 0:
+        ser2.write(b"sendit\n")
+        print("enviada serial 3")
+        sleep(0.5)
+    else:
+        line2 = ser2.readall().decode('utf-8').rstrip()
+        print("resposta serial 3: ", line2)
         order_of_line2_in_json = line2[:1]
         line2 = line2[2:]
 
@@ -119,7 +141,8 @@ def get_sensor_data():
         full_json = full_json+line1
     if order_of_line2_in_json == "3":
         full_json = full_json+line2
-
+    import pdb; pdb.set_trace()
+    print("resposta completa json: " , full_json)
     full_json = json.loads(full_json)
 
     tds_list = []
@@ -146,16 +169,21 @@ def get_sensor_data():
 
     tanque_tds = full_json["tanque"]["tds"]
     tanque_pH = full_json["tanque"]["pH"]
+    print("resultados do get_sensors: ",
+          tds_list, umidade_list, tanque_tds, tanque_pH)
 
     return tds_list, umidade_list, tanque_tds, tanque_pH
 
 
 def atualiza_fila_de_alimentacao(umidade_list):
+    print("atualizando fila de alimentacao")
     i = 0
     fila = []
     while i<len(umidade_list):
         if umidade_list[i]<minimum_moisture:
             fila.append(i)
+    print("fila: ", fila)
+    print("fila atualizada")
     return fila
 
 
@@ -193,65 +221,89 @@ def alimenta(fila, week):
 
     tds = 0
     tank_capacity = 7 #7 litros
+    print("obtendo growchart")
     growchart_getter = GH.Getters()
     todays_nutes = growchart_getter.get_nutrient_parameters_by_week_and_feeding_regime(week, "medium")
     todays_tds = (float(todays_nutes["PPM range (500 scale)"].split('-')[0])+float(todays_nutes["PPM range (500 scale)"].split('-')[1]))/2
-
+    print("nutrientes do dia calculados")
+    
     for vaso in fila:
+        print("alimentando vaso: ", vaso)
         if tanque_vazio == False:
+            print("tanque ainda não está vazio, ligando shaker")
             turn_shaker_on()
             sleep(120)
             turn_shaker_off()
+            print("desligando o shaker pre alimentacao")
             while tds < todays_tds:
                 tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
                 if vaso == 0:
-                    gpio.output(pino_rele_vaso_1, HIGH)
+                    print("alimentando vaso 1")
+                    gpio.output(pino_rele_vaso_1, gpio.HIGH)
                     tds = tds_list[0]
                 if vaso == 1:
-                    gpio.output(pino_rele_vaso_2, HIGH)
+                    print("alimentando vaso 2")
+                    gpio.output(pino_rele_vaso_2, gpio.HIGH)
                     tds = tds_list[1]
                 if vaso == 2:
-                    gpio.output(pino_rele_vaso_3, HIGH)
+                    print("alimentando vaso 3")
+                    gpio.output(pino_rele_vaso_3, gpio.HIGH)
                     tds = tds_list[2]
                 if vaso == 3:
-                    gpio.output(pino_rele_vaso_4, HIGH)
+                    print("alimentando vaso 4")
+                    gpio.output(pino_rele_vaso_4, gpio.HIGH)
                     tds = tds_list[3]
                 if vaso == 4:
-                    gpio.output(pino_rele_vaso_5, HIGH)
+                    print("alimentando vaso 5")
+                    gpio.output(pino_rele_vaso_5, gpio.HIGH)
                     tds = tds_list[4]
                 if vaso == 5:
-                    gpio.output(pino_rele_vaso_6, HIGH)
+                    print("alimentando vaso 6")
+                    gpio.output(pino_rele_vaso_6, gpio.HIGH)
                     tds = tds_list[5]
                 if vaso == 6:
-                    gpio.output(pino_rele_vaso_7, HIGH)
+                    print("alimentando vaso 7")
+                    gpio.output(pino_rele_vaso_7, gpio.HIGH)
                     tds = tds_list[6]
                 if vaso == 7:
-                    gpio.output(pino_rele_vaso_8, HIGH)
+                    print("alimentando vaso 8")
+                    gpio.output(pino_rele_vaso_8, gpio.HIGH)
                     tds = tds_list[7]
                 if vaso == 8:
-                    gpio.output(pino_rele_vaso_9, HIGH)
+                    print("alimentando vaso 9")
+                    gpio.output(pino_rele_vaso_9, gpio.HIGH)
                     tds = tds_list[8]
             else:
                 if vaso == 0:
+                    print("terminando alimentacao do vaso 1")
                     gpio.output(pino_rele_vaso_1, LOW)
                 if vaso == 1:
+                    print("terminando alimentacao do vaso 2")
                     gpio.output(pino_rele_vaso_2, LOW)
                 if vaso == 2:
+                    print("terminando alimentacao do vaso 3")
                     gpio.output(pino_rele_vaso_3, LOW)
                 if vaso == 3:
+                    print("terminando alimentacao do vaso 4")
                     gpio.output(pino_rele_vaso_4, LOW)
                 if vaso == 4:
+                    print("terminando alimentacao do vaso 5")
                     gpio.output(pino_rele_vaso_5, LOW)
                 if vaso == 5:
+                    print("terminando alimentacao do vaso 6")
                     gpio.output(pino_rele_vaso_6, LOW)
                 if vaso == 6:
+                    print("terminando alimentacao do vaso 7")
                     gpio.output(pino_rele_vaso_7, LOW)
                 if vaso == 7:
+                    print("terminando alimentacao do vaso 8")
                     gpio.output(pino_rele_vaso_8, LOW)
                 if vaso == 8:
+                    print("terminando alimentacao do vaso 9")
                     gpio.output(pino_rele_vaso_9, LOW)
 
         if tanque_vazio == True:
+            print("tanque vazio! preparando solução")
             #faz solucao nutritiva
             tank_capacity = 7 #7 litros
             growchart_getter = GH.Getters()
@@ -266,6 +318,7 @@ def alimenta(fila, week):
             proportion_gro = todays_gro * (1/total_nutes)
             proportion_bloom = todays_bloom * (1/total_nutes)
             proportion_micro = todays_micro * (1/total_nutes)
+            print("turning the shaker on baby e sleeping dois minutinhos")
             turn_shaker_on()
             sleep(120)
             tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
@@ -274,70 +327,84 @@ def alimenta(fila, week):
 
             while not todays_minimum_tds < tanque_tds < todays_maximum_tds:
 
-                gpio.output(pino_rele_peristaltica_bloom, HIGH)
+                print("adicionando nutes até chegar no tds correto para a semana")
+                print("tanque tds: " , tanque_tds)
+                print("minimo tds de hoje: " , todays_minimum_tds)
+                print("adding bloom")
+                gpio.output(pino_rele_peristaltica_bloom, gpio.HIGH)
                 sleep(proportion_bloom*0.1)
-                gpio.output(pino_rele_peristaltica_bloom, LOW)
+                gpio.output(pino_rele_peristaltica_bloom, gpio.LOW)
 
-
-                gpio.output(pino_rele_peristaltica_gro, HIGH)
+                print("adding gro")
+                gpio.output(pino_rele_peristaltica_gro, gpio.HIGH)
                 sleep(proportion_gro*0.1)
-                gpio.output(pino_rele_peristaltica_gro, LOW)
-
-                gpio.output(pino_rele_peristaltica_micro, HIGH)
+                gpio.output(pino_rele_peristaltica_gro, gpio.LOW)
+                
+                print("adding micro")
+                gpio.output(pino_rele_peristaltica_micro, gpio.HIGH)
                 sleep(proportion_micro*0.1)
-                gpio.output(pino_rele_peristaltica_micro, LOW)
+                gpio.output(pino_rele_peristaltica_micro, gpio.LOW)
 
                 tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
 
-            while not ph_ideal-0.2 < tanque_pH < ph_ideal +0.2:
+            print("ajustados nutes")
+            while not 420 < tanque_pH < 428:
+                
+                print("ajustando ph")
+                print("ph do tanque: " , tanque_ph)
+                print("ph ideal: " , ph_ideal)
 
+                
                 if tanque_pH < ph_ideal:
-                    gpio.output(pino_rele_peristaltica_phup, HIGH)
+                    gpio.output(pino_rele_peristaltica_phup, gpio.HIGH)
                     sleep(0.1)
-                    gpio.output(pino_rele_peristaltica_phup, LOW)
+                    gpio.output(pino_rele_peristaltica_phup, gpio.LOW)
 
                 if tanque_pH > ph_ideal:
-                    gpio.output(pino_rele_peristaltica_phdown, HIGH)
+                    gpio.output(pino_rele_peristaltica_phdown, gpio.HIGH)
                     sleep(0.1)
-                    gpio.output(pino_rele_peristaltica_phdown, LOW)
+                    gpio.output(pino_rele_peristaltica_phdown, gpio.LOW)
 
                 tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
-
+                sleep(400)
             turn_shaker_off()
+            print("tanque cheio novamente e com nutes!")
             tanque_vazio = False
 
 
 def turn_shaker_on():
-    gpio.output(pino_rele_shaker, HIGH)
+    gpio.output(pino_rele_shaker, gpio.HIGH)
 
 
 def turn_shaker_off():
-    gpio.output(pino_rele_shaker, LOW)
+    gpio.output(pino_rele_shaker, gpio.LOW)
 
 
 def callback_tanque_cheio(pino_sensor_superior_nivel):
     if gpio.input(pino_sensor_superior_nivel):
         #desativa solenoide da agua
-        gpio.output(pino_solenoide, LOW)
+        print("detectado tanque cheio")
+        gpio.output(pino_solenoide, gpio.LOW)
 
 
 def callback_tanque_vazio(pino_sensor_inferior_nivel):
 
     tanque_vazio = True
+    print("detectado tanque vazio")
 
     #desativa a alimentacao dos vasos
-    gpio.output(pino_rele_vaso_1, LOW)
-    gpio.output(pino_rele_vaso_2, LOW)
-    gpio.output(pino_rele_vaso_3, LOW)
-    gpio.output(pino_rele_vaso_4, LOW)
-    gpio.output(pino_rele_vaso_5, LOW)
-    gpio.output(pino_rele_vaso_6, LOW)
-    gpio.output(pino_rele_vaso_7, LOW)
-    gpio.output(pino_rele_vaso_8, LOW)
-    gpio.output(pino_rele_vaso_9, LOW)
+    gpio.output(pino_rele_vaso_1, gpio.LOW)
+    gpio.output(pino_rele_vaso_2, gpio.LOW)
+    gpio.output(pino_rele_vaso_3, gpio.LOW)
+    gpio.output(pino_rele_vaso_4, gpio.LOW)
+    gpio.output(pino_rele_vaso_5, gpio.LOW)
+    gpio.output(pino_rele_vaso_6, gpio.LOW)
+    gpio.output(pino_rele_vaso_7, gpio.LOW)
+    gpio.output(pino_rele_vaso_8, gpio.LOW)
+    gpio.output(pino_rele_vaso_9, gpio.LOW)
 
     #ativa solenoide da agua
-    gpio.output(pino_solenoide, HIGH)
+    gpio.output(pino_solenoide, gpio.HIGH)
 
 
 gpio.add_event_detect(pino_sensor_inferior_nivel, gpio.FALLING, bouncetime=300)
@@ -349,10 +416,17 @@ gpio.add_event_callback(pino_sensor_superior_nivel, callback_tanque_cheio)
 
 while True:
     try:
+        print("000- verificando se alguma planta precisa de alimento")
         tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
+        print("000- atualizando fila de alimentacao")
         fila = atualiza_fila_de_alimentacao(umidade_list)
+        print("000- fila : ", fila)
         week = get_current_week()
         alimenta(fila, week)
+        
         sleep(60*10)
+        print("000- aguardando um pouco")
     except:
-        continue
+        print("isso aqui aconteceu: ", sys.exc_info()[0])
+        import pdb; pdb.set_trace()
+ve
