@@ -105,7 +105,7 @@ void loop()
           Serial.print(tdsValue3);
           Serial.print("\",\"umidade\":\"");
           Serial.print(MoistSensorValue3);
-          Serial.print("\",");
+          Serial.print("\"},");
         }
     }
 

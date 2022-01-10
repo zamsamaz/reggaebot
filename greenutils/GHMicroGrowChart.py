@@ -31,7 +31,7 @@ class Getters:
         except:
             return None
         quantities = {"Growth stage" : data[0], "Photoperiod (h)" : data[1], "Total Nitrogen (ppm)" : data[2], "EC range (mS/cm)" : data[3], "PPM range (500 scale)" : data[4], "FloraMicro (ml/l)" : data[5], "FloraGro (ml/l)" : data[6], "FloraBloom (ml/l)" : data[7]}
-
+    
         return quantities
 
     def adjust_solution_quantities_based_on_tank_capacity(self, quantities, tank_capacity):
