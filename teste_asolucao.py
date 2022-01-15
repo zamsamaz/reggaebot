@@ -24,16 +24,11 @@ gpio.setmode(gpio.BOARD)
 
 # SETUP DO PINO DO SENSOR SUPERIOR DE NIVEL DO TANQUE
 pino_sensor_superior_nivel = 24
-gpio.setup(pino_sensor_superior_nivel, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+gpio.setup(pino_sensor_superior_nivel, gpio.IN, pull_up_down = gpio.PUD_UP)
 
 # SETUP DO PINO DO SENSOR INFERIOR DE NIVEL DO TANQUE
 pino_sensor_inferior_nivel = 26
-gpio.setup(pino_sensor_inferior_nivel, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-
-# SETUP DO PINO DO SENSOR INFERIOR DE NIVEL DO TANQUE
-pino_failsafe_inferior_nivel = 23
-gpio.setup(pino_failsafe_inferior_nivel, gpio.IN, pull_up_down = gpio.PUD_DOWN)
-
+gpio.setup(pino_sensor_inferior_nivel, gpio.IN, pull_up_down = gpio.PUD_UP)
 
 # SETUP DO RELE DA SOLENOIDE DA AGUA
 pino_solenoide = 38
@@ -146,7 +141,7 @@ def get_sensor_data():
         full_json = full_json+line1
     if order_of_line2_in_json == "3":
         full_json = full_json+line2
-
+    import pdb; pdb.set_trace()
     print("resposta completa json: " , full_json)
     full_json = json.loads(full_json)
 
@@ -185,18 +180,15 @@ def atualiza_fila_de_alimentacao(umidade_list):
     i = 0
     fila = []
     while i<len(umidade_list):
-        if int(umidade_list[i])<minimum_moisture:
+        if umidade_list[i]<minimum_moisture:
             fila.append(i)
-        i = i + 1
     print("fila: ", fila)
     print("fila atualizada")
     return fila
 
 
 def get_current_week(initial_date):
-
     days = (initial_date - datetime.now())
-    days = abs(days.days)
     if 1 <= days <= 7:
         return "a"
     if 8 <= days <= 14:
@@ -235,43 +227,8 @@ def alimenta(fila, week):
     todays_tds = (float(todays_nutes["PPM range (500 scale)"].split('-')[0])+float(todays_nutes["PPM range (500 scale)"].split('-')[1]))/2
     print("nutrientes do dia calculados")
 
-    global pino_sensor_superior_nivel
-    global pino_sensor_inferior_nivel
-    global pino_failsafe_inferior_nivel
-
-    global pino_solenoide
-    global pino_rele_vaso_1
-    global pino_rele_vaso_2
-    global pino_rele_vaso_3
-    global pino_rele_vaso_4
-    global pino_rele_vaso_5
-    global pino_rele_vaso_6
-    global pino_rele_vaso_7
-    global pino_rele_vaso_8
-    global pino_rele_vaso_9
-
-# SETUP DOS PINOS DOS RELES DA BOMBA DE AGUA DO SHAKER
-    global pino_rele_shaker
-
-# SETUP DOS PINOS DAS BOMBAS PERISTALTICAS
-    global pino_rele_peristaltica_bloom
-    global pino_rele_peristaltica_gro
-    global pino_rele_peristaltica_micro
-    global pino_rele_peristaltica_phup
-    global pino_rele_peristaltica_phdown
-
-    #import pdb; pdb.set_trace()
-
-    gpio.add_event_detect(pino_sensor_inferior_nivel, gpio.FALLING, bouncetime=9999)
-    gpio.add_event_callback(pino_sensor_inferior_nivel, callback_tanque_vazio)
-
-    gpio.add_event_detect(pino_sensor_superior_nivel, gpio.RISING, bouncetime=999)
-    gpio.add_event_callback(pino_sensor_superior_nivel, callback_tanque_cheio)
-
-
     for vaso in fila:
         print("alimentando vaso: ", vaso)
-        global tanque_vazio
         if tanque_vazio == False:
             print("tanque ainda não está vazio, ligando shaker")
             turn_shaker_on()
@@ -431,27 +388,30 @@ def callback_tanque_cheio(pino_sensor_superior_nivel):
 
 
 def callback_tanque_vazio(pino_sensor_inferior_nivel):
-    if gpio.input(pino_solenoide):
-        return
-    if gpio.input(pino_sensor_inferior_nivel and pino_failsafe_inferior_nivel):
+
+    tanque_vazio = True
+    print("detectado tanque vazio")
+
     #desativa a alimentacao dos vasos
-        gpio.output(pino_rele_vaso_1, gpio.LOW)
-        gpio.output(pino_rele_vaso_3, gpio.LOW)
-        gpio.output(pino_rele_vaso_4, gpio.LOW)
-        gpio.output(pino_rele_vaso_5, gpio.LOW)
-        gpio.output(pino_rele_vaso_6, gpio.LOW)
-        gpio.output(pino_rele_vaso_2, gpio.LOW)
-        gpio.output(pino_rele_vaso_7, gpio.LOW)
-        gpio.output(pino_rele_vaso_8, gpio.LOW)
-        gpio.output(pino_rele_vaso_9, gpio.LOW)
-        gpio.output(pino_rele_shaker, gpio.LOW)
-        #ativa solenoide da agua
-        gpio.output(pino_solenoide, gpio.HIGH)
-        tanque_vazio = True
-        print("detectado tanque vazio")
+    gpio.output(pino_rele_vaso_1, gpio.LOW)
+    gpio.output(pino_rele_vaso_2, gpio.LOW)
+    gpio.output(pino_rele_vaso_3, gpio.LOW)
+    gpio.output(pino_rele_vaso_4, gpio.LOW)
+    gpio.output(pino_rele_vaso_5, gpio.LOW)
+    gpio.output(pino_rele_vaso_6, gpio.LOW)
+    gpio.output(pino_rele_vaso_7, gpio.LOW)
+    gpio.output(pino_rele_vaso_8, gpio.LOW)
+    gpio.output(pino_rele_vaso_9, gpio.LOW)
+
+    #ativa solenoide da agua
+    gpio.output(pino_solenoide, gpio.HIGH)
 
 
+gpio.add_event_detect(pino_sensor_inferior_nivel, gpio.FALLING, bouncetime=280000)
+gpio.add_event_callback(pino_sensor_inferior_nivel, callback_tanque_vazio)
 
+gpio.add_event_detect(pino_sensor_superior_nivel, gpio.RISING, bouncetime=280000)
+gpio.add_event_callback(pino_sensor_superior_nivel, callback_tanque_cheio)
 
 
 while True:
@@ -461,8 +421,7 @@ while True:
         print("000- atualizando fila de alimentacao")
         fila = atualiza_fila_de_alimentacao(umidade_list)
         print("000- fila : ", fila)
-        week = get_current_week(init_date)
-        print("000- semana ", week)
+        week = get_current_week()
         alimenta(fila, week)
 
         sleep(60*10)
@@ -470,3 +429,4 @@ while True:
     except:
         print("isso aqui aconteceu: ", sys.exc_info()[0])
         import pdb; pdb.set_trace()
+ve
