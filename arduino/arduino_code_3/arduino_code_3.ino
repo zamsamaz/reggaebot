@@ -79,6 +79,6 @@ void loop()
     Serial.print(pHTempSensorValue0);
     Serial.print("\"}}");
     Serial.print("fim");
-    delay(100);
+    delay(1000);
 
 }
