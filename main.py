@@ -76,53 +76,70 @@ gpio.setup(pino_rele_peristaltica_phdown, gpio.OUT)
 print("pinos setados")
 print("setup feito")
 
+print("setando serial")
+
+ser0 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0.1)
+ser1 = serial.Serial('/dev/ttyUSB1', 115200, timeout=0.1)
+ser2 = serial.Serial('/dev/ttyUSB2', 115200, timeout=0.1)
+
+print("serial setada")
+
+
 def get_sensor_data():
 
     print("obtendo dados de sensores")
     full_json = ""
-    print("setando serial")
-
-    ser0 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0.1)
-    ser1 = serial.Serial('/dev/ttyUSB1', 115200, timeout=0.1)
-    ser2 = serial.Serial('/dev/ttyUSB2', 115200, timeout=0.1)
-
-    print("serial setada")
 
     ser0.reset_input_buffer()
+    sleep(0.1)
+    line0 = ser0.readall().decode('utf-8')
+    if line0.find("1-") != -1:
+        start_index_line0 = line0.find("1-")+2
+        order_of_line0_in_json = 1
+    if line0.find("2-") != -1:
+        start_index_line0 = line0.find("2-")+2
+        order_of_line0_in_json = 2
+    if line0.find("3-") != -1:
+        start_index_line0 = line0.find("3-")+2
+        order_of_line0_in_json = 3
+    end_index_line0 = line0.find("fim", start_index_line0)
+    line0 = line0[start_index_line0:end_index_line0]
+    print("resposta serial 1: ", line0)
+
+
     ser1.reset_input_buffer()
+    sleep(0.1)
+    line1 = ser1.readall().decode('utf-8')
+    if line1.find("1-") != -1:
+        start_index_line1 = line1.find("1-")+2
+        order_of_line1_in_json = 1
+    if line1.find("2-") != -1:
+        start_index_line1 = line1.find("2-")+2
+        order_of_line1_in_json = 2
+    if line1.find("3-") != -1:
+        start_index_line1 = line1.find("3-")+2
+        order_of_line1_in_json = 3
+    end_index_line1 = line1.find("fim", start_index_line1)
+    line1 = line1[start_index_line1:end_index_line1]
+    print("resposta serial 2: ", line1)
+
     ser2.reset_input_buffer()
-
-    while ser0.in_waiting == 0:
-        ser0.write(b"sendit\n")
-        print("enviada serial 1")
-        sleep(0.5)
-    else:
-        line0 = ser0.readall().decode('utf-8').rstrip()
-        print("resposta serial 1: ", line0)
-        order_of_line0_in_json = line0[:1]
-        line0 = line0[2:]
-
-
-    while ser1.in_waiting == 0:
-        ser1.write(b"sendit\n")
-        print("enviada serial 2")
-        sleep(0.5)
-    else:
-        line1 = ser1.readall().decode('utf-8').rstrip()
-        print("resposta serial 2: ", line1)
-        order_of_line1_in_json = line1[:1]
-        line1 = line1[2:]
+    sleep(0.1)
+    line2 = ser2.readall().decode('utf-8')
+    if line2.find("1-") != -1:
+        start_index_line2 = line2.find("1-")+2
+        order_of_line2_in_json = 1
+    if line2.find("2-") != -1:
+        start_index_line2 = line2.find("2-")+2
+        order_of_line2_in_json = 2
+    if line2.find("3-") != -1:
+        start_index_line2 = line2.find("3-")+2
+        order_of_line2_in_json = 3
+    end_index_line2 = line2.find("fim", start_index_line2)
+    line2 = line2[start_index_line2:end_index_line2]
+    print("resposta serial 3: ", line2)
 
 
-    while ser2.in_waiting == 0:
-        ser2.write(b"sendit\n")
-        print("enviada serial 3")
-        sleep(0.5)
-    else:
-        line2 = ser2.readall().decode('utf-8').rstrip()
-        print("resposta serial 3: ", line2)
-        order_of_line2_in_json = line2[:1]
-        line2 = line2[2:]
 
     if order_of_line0_in_json == "1":
         full_json = full_json+line0

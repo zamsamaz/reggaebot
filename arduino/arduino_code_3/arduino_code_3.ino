@@ -66,21 +66,19 @@ void loop()
     int pHSensorValue0 = analogRead(pHSensorPin0);
     int pHTempSensorValue0 = analogRead(pHTempSensorPin0);
 
-    if (Serial.available() > 0) {
-      String data = Serial.readStringUntil('\n');
-      if (data == "sendit"){;
-          Serial.print("3-\"vaso_9\":{\"tds\":\"");
-          Serial.print(tdsValue0);
-          Serial.print("\",\"umidade\":\"");
-          Serial.print(MoistSensorValue0);
-          Serial.print("\"},\"tanque\":{\"tds\":\"");
-          Serial.print(tdsValue1);
-          Serial.print("\",\"pH\":\"");
-          Serial.print(pHSensorValue0);
-          Serial.print("\",\"temp\":\"");
-          Serial.print(pHTempSensorValue0);
-          Serial.print("\"}}");
-        }
-    //delay(1000);
-    }
+
+    Serial.print("3-\"vaso_9\":{\"tds\":\"");
+    Serial.print(tdsValue0);
+    Serial.print("\",\"umidade\":\"");
+    Serial.print(MoistSensorValue0);
+    Serial.print("\"},\"tanque\":{\"tds\":\"");
+    Serial.print(tdsValue1);
+    Serial.print("\",\"pH\":\"");
+    Serial.print(pHSensorValue0);
+    Serial.print("\",\"temp\":\"");
+    Serial.print(pHTempSensorValue0);
+    Serial.print("\"}}");
+    Serial.print("fim");
+    delay(100);
+
 }

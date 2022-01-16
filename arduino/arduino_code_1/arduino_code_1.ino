@@ -86,27 +86,25 @@ void loop()
     MoistSensorValue3 = analogRead(MoistSensorPin3);
 
 
-    if (Serial.available() > 0) {
-      String data = Serial.readStringUntil('\n');
-      if (data == "sendit"){;
-          Serial.print("1-{\"vaso_1\":{\"tds\":\"");
-          Serial.print(tdsValue0);
-          Serial.print("\",\"umidade\":\"");
-          Serial.print(MoistSensorValue0);
-          Serial.print("\"},\"vaso_2\":{\"tds\":\"");
-          Serial.print(tdsValue1);
-          Serial.print("\",\"umidade\":\"");
-          Serial.print(MoistSensorValue1);
-          Serial.print("\"},\"vaso_3\":{\"tds\":\"");
-          Serial.print(tdsValue2);
-          Serial.print("\",\"umidade\":\"");
-          Serial.print(MoistSensorValue2);
-          Serial.print("\"},\"vaso_4\":{\"tds\":\"");
-          Serial.print(tdsValue3);
-          Serial.print("\",\"umidade\":\"");
-          Serial.print(MoistSensorValue3);
-          Serial.print("\"},");
-        }
-    }
+
+    Serial.print("1-{\"vaso_1\":{\"tds\":\"");
+    Serial.print(tdsValue0);
+    Serial.print("\",\"umidade\":\"");
+    Serial.print(MoistSensorValue0);
+    Serial.print("\"},\"vaso_2\":{\"tds\":\"");
+    Serial.print(tdsValue1);
+    Serial.print("\",\"umidade\":\"");
+    Serial.print(MoistSensorValue1);
+    Serial.print("\"},\"vaso_3\":{\"tds\":\"");
+    Serial.print(tdsValue2);
+    Serial.print("\",\"umidade\":\"");
+    Serial.print(MoistSensorValue2);
+    Serial.print("\"},\"vaso_4\":{\"tds\":\"");
+    Serial.print(tdsValue3);
+    Serial.print("\",\"umidade\":\"");
+    Serial.print(MoistSensorValue3);
+    Serial.print("\"},");
+    Serial.print("fim");
+    delay(100);
 
 }
