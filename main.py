@@ -426,7 +426,7 @@ def cria_solucao(todays_nutes):
     proportion_micro = todays_micro * (1/total_nutes)
     print("turning the shaker on baby e sleeping dois minutinhos")
     turn_shaker_on()
-    #sleep(120)
+    sleep(20)
     tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
 
     # as bombas peristalticas tem vazao de 40ml/min com 12v -> 0.666ml/s
@@ -457,22 +457,22 @@ def cria_solucao(todays_nutes):
     while not 420 < int(tanque_pH) < 428:
 
         print("ajustando ph")
-        print("ph do tanque: " , tanque_ph)
+        print("ph do tanque: " , tanque_pH)
         print("ph ideal: " , ph_ideal)
 
 
         if int(tanque_pH) < int(ph_ideal):
             gpio.output(pino_rele_peristaltica_phup, gpio.HIGH)
-            sleep(0.2)
+            sleep(0.1)
             gpio.output(pino_rele_peristaltica_phup, gpio.LOW)
 
         if int(tanque_pH) > int(ph_ideal):
             gpio.output(pino_rele_peristaltica_phdown, gpio.HIGH)
-            sleep(0.2)
+            sleep(0.1)
             gpio.output(pino_rele_peristaltica_phdown, gpio.LOW)
 
         tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
-        sleep(10)
+        sleep(120)
     turn_shaker_off()
     print("tanque cheio novamente e com nutes!")
     return 1
