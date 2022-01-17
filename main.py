@@ -400,7 +400,7 @@ def alimenta(fila, week):
 
 def cria_solucao(todays_nutes):
     
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     print("tanque vazio, preparando solução")
     
     while gpio.input(pino_sensor_superior_nivel) == 0:
@@ -454,21 +454,21 @@ def cria_solucao(todays_nutes):
         tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
 
     print("ajustados nutes")
-    while not 420 < tanque_pH < 428:
+    while not 420 < int(tanque_pH) < 428:
 
         print("ajustando ph")
         print("ph do tanque: " , tanque_ph)
         print("ph ideal: " , ph_ideal)
 
 
-        if tanque_pH < ph_ideal:
+        if int(tanque_pH) < int(ph_ideal):
             gpio.output(pino_rele_peristaltica_phup, gpio.HIGH)
-            sleep(0.1)
+            sleep(0.2)
             gpio.output(pino_rele_peristaltica_phup, gpio.LOW)
 
-        if tanque_pH > ph_ideal:
+        if int(tanque_pH) > int(ph_ideal):
             gpio.output(pino_rele_peristaltica_phdown, gpio.HIGH)
-            sleep(0.1)
+            sleep(0.2)
             gpio.output(pino_rele_peristaltica_phdown, gpio.LOW)
 
         tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
