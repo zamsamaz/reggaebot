@@ -281,92 +281,118 @@ def alimenta(fila, week):
     global pino_rele_peristaltica_phdown
 
     for vaso in fila:
-        print("checando vaso: ", vaso)
-        
-        
+        print("vasos na fila: ", fila)
+        tempo_sleep = 10
+
         #print("tanque ainda não está vazio, ligando shaker")
         #turn_shaker_on()
         #sleep(10)
         #turn_shaker_off()
         #print("desligando o shaker pre alimentacao")
 
-        while float(tds) < todays_tds:
+        #tds comeca maior pois ha nutrientes ainda na terra antiga provavelmente
+        while todays_tds-10 <= float(tds) <= todays_tds+10:
+
             tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
+
             if vaso == 0:
+                vaso_atual = vaso
                 if not gpio.input(pino_sensor_inferior_nivel) and not gpio.input(pino_failsafe_inferior_nivel):
                     gpio.output(pino_rele_vaso_1, gpio.LOW)
                     cria_solucao(todays_nutes)
-              
+
                 print("alimentando vaso 1")
                 gpio.output(pino_rele_vaso_1, gpio.HIGH)
-                sleep(5)
+                sleep(tempo_sleep)
+                gpio.output(pino_rele_vaso_1, gpio.LOW)
                 tds = tds_list[0]
+
             if vaso == 1:
                 if not gpio.input(pino_sensor_inferior_nivel) and not gpio.input(pino_failsafe_inferior_nivel):
                     gpio.output(pino_rele_vaso_2, gpio.LOW)
-                    cria_solucao(todays_nutes)            
-            
+                    cria_solucao(todays_nutes)
+
                 print("alimentando vaso 2")
                 gpio.output(pino_rele_vaso_2, gpio.HIGH)
-                sleep(5)
+                sleep(tempo_sleep)
+                gpio.output(pino_rele_vaso_2, gpio.LOW)
                 tds = tds_list[1]
+
             if vaso == 2:
                 if not gpio.input(pino_sensor_inferior_nivel) and not gpio.input(pino_failsafe_inferior_nivel):
                     gpio.output(pino_rele_vaso_3, gpio.LOW)
                     cria_solucao(todays_nutes)
-                    
+
                 print("alimentando vaso 3")
-                sleep(5)
                 gpio.output(pino_rele_vaso_3, gpio.HIGH)
+                sleep(tempo_sleep)
+                gpio.output(pino_rele_vaso_3, gpio.LOW)
                 tds = tds_list[2]
+
             if vaso == 3:
-                print("alimentando vaso 4")
-                sleep(5)
                 if not gpio.input(pino_sensor_inferior_nivel) and not gpio.input(pino_failsafe_inferior_nivel):
                     gpio.output(pino_rele_vaso_4, gpio.LOW)
                     cria_solucao(todays_nutes)
+
+                print("alimentando vaso 4")
                 gpio.output(pino_rele_vaso_4, gpio.HIGH)
+                sleep(tempo_sleep)
+                gpio.output(pino_rele_vaso_4, gpio.LOW)
                 tds = tds_list[3]
+
             if vaso == 4:
                 if not gpio.input(pino_sensor_inferior_nivel) and not gpio.input(pino_failsafe_inferior_nivel):
                     gpio.output(pino_rele_vaso_5, gpio.LOW)
                     cria_solucao(todays_nutes)
-                    
+
                 print("alimentando vaso 5")
-                sleep(5)
                 gpio.output(pino_rele_vaso_5, gpio.HIGH)
+                sleep(tempo_sleep)
+                gpio.output(pino_rele_vaso_5, gpio.LOW)
                 tds = tds_list[4]
+
             if vaso == 5:
                 if not gpio.input(pino_sensor_inferior_nivel) and not gpio.input(pino_failsafe_inferior_nivel):
                     gpio.output(pino_rele_vaso_6, gpio.LOW)
-                    cria_solucao(todays_nutes)                
+                    cria_solucao(todays_nutes)
+
                 print("alimentando vaso 6")
                 gpio.output(pino_rele_vaso_6, gpio.HIGH)
-                sleep(5)
+                sleep(tempo_sleep)
+                gpio.output(pino_rele_vaso_6, gpio.LOW)
                 tds = tds_list[5]
+
             if vaso == 6:
                 if not gpio.input(pino_sensor_inferior_nivel) and not gpio.input(pino_failsafe_inferior_nivel):
                     gpio.output(pino_rele_vaso_7, gpio.LOW)
-                    cria_solucao()                
+                    cria_solucao()
+
                 print("alimentando vaso 7")
                 gpio.output(pino_rele_vaso_7, gpio.HIGH)
-                sleep(5)
+                sleep(tempo_sleep)
+                gpio.output(pino_rele_vaso_7, gpio.LOW)
                 tds = tds_list[6]
+
             if vaso == 7:
                 if not gpio.input(pino_sensor_inferior_nivel) and not gpio.input(pino_failsafe_inferior_nivel):
                     gpio.output(pino_rele_vaso_8, gpio.LOW)
                     cria_solucao(todays_nutes)
+
                 print("alimentando vaso 8")
                 gpio.output(pino_rele_vaso_8, gpio.HIGH)
-                sleep(5)
+                sleep(tempo_sleep)
+                gpio.output(pino_rele_vaso_8, gpio.LOW)
                 tds = tds_list[7]
+
             if vaso == 8:
                 if not gpio.input(pino_sensor_inferior_nivel) and not gpio.input(pino_failsafe_inferior_nivel):
                     gpio.output(pino_rele_vaso_9, gpio.LOW)
-                    cria_solucao(todays_nutes)                
+                    cria_solucao(todays_nutes)
+
                 print("alimentando vaso 9")
                 gpio.output(pino_rele_vaso_9, gpio.HIGH)
-                sleep(5)
+                sleep(tempo_sleep)
+                gpio.output(pino_rele_vaso_9, gpio.LOW)
                 tds = tds_list[8]
         else:
             if vaso == 0:
@@ -399,10 +425,10 @@ def alimenta(fila, week):
 
 
 def cria_solucao(todays_nutes):
-    
+
     #import pdb; pdb.set_trace()
     print("tanque vazio, preparando solução")
-    
+
     while gpio.input(pino_sensor_superior_nivel) == 0:
         gpio.output(pino_solenoide, gpio.HIGH)
         sleep(0.1)
@@ -498,7 +524,7 @@ while True:
     alimenta(fila, week)
     print("000- aguardando um pouco")
     sleep(60*10)
-   
+
    #except:
         #print("desligando todos reles")
         #gpio.output(pino_rele_shaker, gpio.LOW)
