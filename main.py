@@ -281,7 +281,6 @@ def alimenta(fila, week):
     global pino_rele_peristaltica_phdown
 
     for vaso in fila:
-        print("vasos na fila: ", fila)
         tempo_sleep = 10
 
         #print("tanque ainda não está vazio, ligando shaker")
@@ -289,9 +288,12 @@ def alimenta(fila, week):
         #sleep(10)
         #turn_shaker_off()
         #print("desligando o shaker pre alimentacao")
+        print("tds: ", float(tds))
+        print("minimum tds: ", todays_tds-10)
+        print("maximum tds: ", todays_tds+10)
 
         #tds comeca maior pois ha nutrientes ainda na terra antiga provavelmente
-        while todays_tds-10 <= float(tds) <= todays_tds+10:
+        while (todays_tds-10 <= float(tds) <= todays_tds+10) == False:
 
             tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
 

@@ -62,6 +62,7 @@ void loop()
     float tdsValue1 = gravityTds1.getTdsValue();  // then get the value
 
     MoistSensorValue0 = analogRead(MoistSensorPin0);
+    MoistSensorValue0 = analogRead(MoistSensorPin0);
 
     int pHSensorValue0 = analogRead(pHSensorPin0);
     int pHTempSensorValue0 = analogRead(pHTempSensorPin0);

@@ -1,5 +1,21 @@
 import RPi.GPIO as gpio
 gpio.setmode(gpio.BOARD)
+
+
+# SETUP DO PINO DO SENSOR SUPERIOR DE NIVEL DO TANQUE
+pino_sensor_superior_nivel = 24
+gpio.setup(pino_sensor_superior_nivel, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+
+# SETUP DO PINO DO SENSOR INFERIOR DE NIVEL DO TANQUE
+pino_sensor_inferior_nivel = 26
+gpio.setup(pino_sensor_inferior_nivel, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+
+# SETUP DO PINO DO SENSOR INFERIOR DE NIVEL DO TANQUE (FAILSAFE)
+pino_failsafe_inferior_nivel = 23
+gpio.setup(pino_failsafe_inferior_nivel, gpio.IN, pull_up_down = gpio.PUD_DOWN)
+
+
+
 # SETUP DO RELE DA SOLENOIDE DA AGUA
 pino_solenoide = 38
 gpio.setup(pino_solenoide, gpio.OUT)
