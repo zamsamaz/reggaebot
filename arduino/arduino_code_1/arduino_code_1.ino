@@ -9,9 +9,6 @@
 
 #include <EEPROM.h>
 
-#include "GravityTDS.h"
-
-
 #define TdsSensorPin0 A0
 #define TdsSensorPin1 A2
 #define TdsSensorPin2 A4
@@ -22,63 +19,49 @@
 #define MoistSensorPin2 A5
 #define MoistSensorPin3 A7
 
-GravityTDS gravityTds0;
-GravityTDS gravityTds1;
-GravityTDS gravityTds2;
-GravityTDS gravityTds3;
-
-int MoistSensorValue0;
-int MoistSensorValue1;
-int MoistSensorValue2;
-int MoistSensorValue3;
-
 
 void setup()
 {
     Serial.begin(115200);
-
-    gravityTds0.setPin(TdsSensorPin0);
-    gravityTds1.setPin(TdsSensorPin1);
-    gravityTds2.setPin(TdsSensorPin2);
-    gravityTds3.setPin(TdsSensorPin3);
-
-    gravityTds0.setAref(5.0);  //reference voltage on ADC, default 5.0V on Arduino UNO
-    gravityTds1.setAref(5.0);  //reference voltage on ADC, default 5.0V on Arduino UNO
-    gravityTds2.setAref(5.0);  //reference voltage on ADC, default 5.0V on Arduino UNO
-    gravityTds3.setAref(5.0);  //reference voltage on ADC, default 5.0V on Arduino UNO
-
-    gravityTds0.setAdcRange(1024);  //1024 for 10bit ADC;4096 for 12bit ADC
-    gravityTds1.setAdcRange(1024);  //1024 for 10bit ADC;4096 for 12bit ADC
-    gravityTds2.setAdcRange(1024);  //1024 for 10bit ADC;4096 for 12bit ADC
-    gravityTds3.setAdcRange(1024);  //1024 for 10bit ADC;4096 for 12bit ADC
-
-
-    gravityTds0.begin();  //initialization
-    gravityTds1.begin();  //initialization
-    gravityTds2.begin();  //initialization
-    gravityTds3.begin();  //initialization
+    pinMode(TdsSensorPin0,INPUT);
+    pinMode(TdsSensorPin1,INPUT);
+    pinMode(TdsSensorPin2,INPUT);
+    pinMode(TdsSensorPin3,INPUT);
+    pinMode(MoistSensorPin0,INPUT);
+    pinMode(MoistSensorPin1,INPUT);
+    pinMode(MoistSensorPin2,INPUT);
+    pinMode(MoistSensorPin3,INPUT);
 
 }
 
 void loop()
 {
+    int MoistSensorValue0;
+    int MoistSensorValue1;
+    int MoistSensorValue2;
+    int MoistSensorValue3;
+    int tdsEcCoef = 280;
     //temperature = readTemperature();  //add your temperature sensor and read it
     float temperature = 25;
+    float aref = 5.0;
+    float ecCalibration = 1;
+    float temperatureCoefficient = 1.0 + 0.02 * (25.0 - 25.0); // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
+    
+    float rawEc0 = analogRead(TdsSensorPin0) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+    float ec0 = (rawEc0 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
+    float tdsValue0 = ec0*tdsEcCoef;
 
-    gravityTds0.setTemperature(temperature);  // set the temperature and execute temperature compensation
-    gravityTds1.setTemperature(temperature);  // set the temperature and execute
-    gravityTds2.setTemperature(temperature);  // set the temperature and execute
-    gravityTds3.setTemperature(temperature);  // set the temperature and execute
-
-    gravityTds0.update();  //sample and calculate
-    gravityTds1.update();  //sample and calculate
-    gravityTds2.update();  //sample and calculate
-    gravityTds3.update();  //sample and calculate
-
-    float tdsValue0 = gravityTds0.getTdsValue();  // then get the value
-    float tdsValue1 = gravityTds1.getTdsValue();  // then get the value
-    float tdsValue2 = gravityTds2.getTdsValue();  // then get the value
-    float tdsValue3 = gravityTds3.getTdsValue();  // then get the value
+    float rawEc1 = analogRead(TdsSensorPin1) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+    float ec1 = (rawEc1 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
+    float tdsValue1 = ec1*tdsEcCoef;
+    
+    float rawEc2 = analogRead(TdsSensorPin2) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+    float ec2 = (rawEc2 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
+    float tdsValue2 = ec2*tdsEcCoef;
+    
+    float rawEc3 = analogRead(TdsSensorPin3) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+    float ec3 = (rawEc3 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
+    float tdsValue3 = ec3*tdsEcCoef;
 
     MoistSensorValue0 = analogRead(MoistSensorPin0);
     MoistSensorValue1 = analogRead(MoistSensorPin1);

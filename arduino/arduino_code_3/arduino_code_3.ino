@@ -9,58 +9,43 @@
 
 #include <EEPROM.h>
 
-#include "GravityTDS.h"
-
 #define TdsSensorPin0 A0
 #define TdsSensorPin1 A2
 
 #define MoistSensorPin0 A1
 
 #define pHSensorPin0 A3
-
 #define pHTempSensorPin0 A4
-
-GravityTDS gravityTds0;
-GravityTDS gravityTds1;
-
-int MoistSensorValue0;
-
 
 void setup()
 {
     Serial.begin(115200);
-
-        pinMode(pHSensorPin0,INPUT);
-        pinMode(pHTempSensorPin0,INPUT);
-
-
-    gravityTds0.setPin(TdsSensorPin0);
-    gravityTds1.setPin(TdsSensorPin1);
-
-    gravityTds0.setAref(5.0);  //reference voltage on ADC, default 5.0V on Arduino UNO
-    gravityTds1.setAref(5.0);  //reference voltage on ADC, default 5.0V on Arduino UNO
-
-    gravityTds0.setAdcRange(1024);  //1024 for 10bit ADC;4096 for 12bit ADC
-    gravityTds1.setAdcRange(1024);  //1024 for 10bit ADC;4096 for 12bit ADC
-
-    gravityTds0.begin();  //initialization
-    gravityTds1.begin();  //initialization
+    pinMode(TdsSensorPin0,INPUT);
+    pinMode(TdsSensorPin1,INPUT);
+    pinMode(MoistSensorPin0,INPUT);
+    pinMode(pHSensorPin0,INPUT);
+    pinMode(pHTempSensorPin0,INPUT);
 
 }
 
 void loop()
 {
-    float temperature = 26;
+    int MoistSensorValue0;
+    int tdsEcCoef = 280;
+    //temperature = readTemperature();  //add your temperature sensor and read it
+    float temperature = 25;
+    float aref = 5.0;
+    float ecCalibration = 1;
+    float temperatureCoefficient = 1.0 + 0.02 * (25.0 - 25.0); // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
+    
+    float rawEc0 = analogRead(TdsSensorPin0) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+    float ec0 = (rawEc0 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
+    float tdsValue0 = ec0*tdsEcCoef;
 
-    gravityTds0.setTemperature(temperature);  // set the temperature and execute temperature compensation
-    gravityTds1.setTemperature(temperature);  // set the temperature and execute
-
-    gravityTds0.update();  //sample and calculate
-    gravityTds1.update();  //sample and calculate
-
-    float tdsValue0 = gravityTds0.getTdsValue();  // then get the value
-    float tdsValue1 = gravityTds1.getTdsValue();  // then get the value
-
+    float rawEc1 = analogRead(TdsSensorPin1) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+    float ec1 = (rawEc1 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
+    float tdsValue1 = ec1*tdsEcCoef;
+  
     MoistSensorValue0 = analogRead(MoistSensorPin0);
     MoistSensorValue0 = analogRead(MoistSensorPin0);
 

@@ -454,12 +454,11 @@ def cria_solucao(todays_nutes):
     proportion_micro = todays_micro * (1/total_nutes)
     print("turning the shaker on baby e sleeping dois minutinhos")
     turn_shaker_on()
-    sleep(20)
+    sleep(30)
     tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
 
     # as bombas peristalticas tem vazao de 40ml/min com 12v -> 0.666ml/s
-
-    while not float(todays_minimum_tds) < float(tanque_tds) < float(todays_maximum_tds):
+    while (float(todays_minimum_tds) <= float(tanque_tds) <= float(todays_maximum_tds)) == False:
 
         print("adicionando nutes até chegar no tds correto para a semana")
         print("tanque tds: " , tanque_tds)
@@ -482,19 +481,20 @@ def cria_solucao(todays_nutes):
         tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
 
     print("ajustados nutes")
-    while not 420 < int(tanque_pH) < 428:
-
+    
+    while (596 <= int(tanque_pH) <= 604) == False:
+   
         print("ajustando ph")
         print("ph do tanque: " , tanque_pH)
         print("ph ideal: " , ph_ideal)
 
 
-        if int(tanque_pH) < int(ph_ideal):
+        if int(tanque_pH) > int(ph_ideal):
             gpio.output(pino_rele_peristaltica_phup, gpio.HIGH)
             sleep(0.1)
             gpio.output(pino_rele_peristaltica_phup, gpio.LOW)
 
-        if int(tanque_pH) > int(ph_ideal):
+        if int(tanque_pH) < int(ph_ideal):
             gpio.output(pino_rele_peristaltica_phdown, gpio.HIGH)
             sleep(0.1)
             gpio.output(pino_rele_peristaltica_phdown, gpio.LOW)
