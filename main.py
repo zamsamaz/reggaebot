@@ -490,11 +490,13 @@ def cria_solucao(todays_nutes):
 
 
         if int(tanque_pH) > int(ph_ideal):
+            print("aumentando ph")
             gpio.output(pino_rele_peristaltica_phup, gpio.HIGH)
             sleep(0.1)
             gpio.output(pino_rele_peristaltica_phup, gpio.LOW)
 
         if int(tanque_pH) < int(ph_ideal):
+            print("diminuindo ph")
             gpio.output(pino_rele_peristaltica_phdown, gpio.HIGH)
             sleep(0.1)
             gpio.output(pino_rele_peristaltica_phdown, gpio.LOW)
@@ -514,6 +516,11 @@ def turn_shaker_off():
     gpio.output(pino_rele_shaker, gpio.LOW)
 
 
+if sys.argv[1] == "control-mode":
+    tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
+    import pdb; pdb.set_trace()
+    tds_list, umidade_list, tanque_tds, tanque_pH = get_sensor_data()
+    
 while True:
     #try:
     print("000- verificando se alguma planta precisa de alimento")

@@ -11,16 +11,16 @@ class Getters:
     # Returns a dataframe containing the complete growchart. Needs the type of the feeding regime as input ("agressive", "medium", or "light", as strings) or else will raise ValueError
 
         try:
-            growchart = pd.read_pickle("agressive_feed_growchart.pkl") #test if one of dfs exist
+            growchart = pd.read_pickle("greenutils/agressive_feed_growchart.pkl") #test if one of dfs exist
         except IOError:
             from greenutils import gh_micro_grow_chart_raw_data_to_df #creates the dataframes if exception is raised
 
         if feeding_regime == "agressive":
-            return pd.read_pickle("agressive_feed_growchart.pkl")
+            return pd.read_pickle("greenutils/agressive_feed_growchart.pkl")
         if feeding_regime == "medium":
-            return pd.read_pickle("medium_feed_growchart.pkl")
+            return pd.read_pickle("greenutils/medium_feed_growchart.pkl")
         if feeding_regime == "light":
-            return pd.read_pickle("light_feed_growchart.pkl")
+            return pd.read_pickle("greenutils/light_feed_growchart.pkl")
         else:
             raise ValueError
 
