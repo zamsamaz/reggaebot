@@ -525,8 +525,6 @@ def create_nutritive_solution(todays_nutes):
     return 1
 
 
-drainage_relay_pin
-
 def turn_drainage_on():
     print("turning drainage on")
     gpio.output(drainage_relay_pin, gpio.HIGH)
@@ -556,7 +554,7 @@ if sys.argv[1] == "control-mode":
     tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
 
 while True:
-    print("000- checking sensor to see if plants need nutes")
+    print("000- checking sensors to see if plants need nutes")
     tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
     print("000- updating feeding queue")
     queue = update_feeding_queue(moisture_list)
