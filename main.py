@@ -45,6 +45,10 @@ gpio.setup(inferior_level_sensor_failsafe_pin, gpio.IN, pull_up_down = gpio.PUD_
 solenoid_pin = 38
 gpio.setup(solenoid_pin, gpio.OUT)
 
+# SETUP DO RELE DA BOMBA DE DRENAGEM
+drainage_relay_pin = "XX"
+gpio.setup(drainage_relay_pin, gpio.OUT)
+
 # SETUP DOS PINOS DOS RELES DE BOMBAS DE AGUA DE ALIMENTACAO
 vase_1_relay_pin = 33
 gpio.setup(vase_1_relay_pin, gpio.OUT)
@@ -204,6 +208,7 @@ def get_sensor_data():
     print("get_sensors results: ",
           tds_list, moisture_list, tank_tds, tank_ph)
 
+    #LOG THIS
     return tds_list, moisture_list, tank_tds, tank_ph
 
 
@@ -217,6 +222,8 @@ def update_feeding_queue(moisture_list):
         i = i + 1
     print("queue: ", queue)
     print("queue updated")
+
+    #LOG THIS
     return queue
 
 
@@ -302,15 +309,19 @@ def feed(queue, week):
         while (todays_tds-10 <= float(tds) <= todays_tds+10) == False:
 
             tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
+            turn_drainage_on()
 
             if vase == 0:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
                     gpio.output(vase_1_relay_pin, gpio.LOW)
                     create_nutritive_solution(todays_nutes)
+                    #LOG THIS
 
                 print("feeding vase 1")
+                #LOG THIS
                 gpio.output(vase_1_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
+                #LOG THIS
                 gpio.output(vase_1_relay_pin, gpio.LOW)
                 tds = tds_list[0]
 
@@ -429,7 +440,8 @@ def feed(queue, week):
             if vase == 8:
                 print("finished feeding vase 9")
                 gpio.output(vase_9_relay_pin, gpio.LOW)
-
+            sleep(20)
+            turn_drainage_off()
 
 def create_nutritive_solution(todays_nutes):
 
@@ -513,6 +525,18 @@ def create_nutritive_solution(todays_nutes):
     return 1
 
 
+drainage_relay_pin
+
+def turn_drainage_on():
+    print("turning drainage on")
+    gpio.output(drainage_relay_pin, gpio.HIGH)
+
+
+def turn_shaker_off():
+    print("turning drainage off")
+    gpio.output(drainage_relay_pin, gpio.LOW)
+
+
 def turn_shaker_on():
     print("turning shaker on")
     gpio.output(shaker_relay_pin, gpio.HIGH)
@@ -522,6 +546,9 @@ def turn_shaker_off():
     print("turning shaker off")
     gpio.output(shaker_relay_pin, gpio.LOW)
 
+
+def log_event_on_database(event, caller):
+    return 0
 
 if sys.argv[1] == "control-mode":
     tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
