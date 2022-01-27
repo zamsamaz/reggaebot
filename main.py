@@ -46,7 +46,7 @@ solenoid_pin = 38
 gpio.setup(solenoid_pin, gpio.OUT)
 
 # SETUP DO RELE DA BOMBA DE DRENAGEM
-drainage_relay_pin = "XX"
+drainage_relay_pin = 5
 gpio.setup(drainage_relay_pin, gpio.OUT)
 
 # SETUP DOS PINOS DOS RELES DE BOMBAS DE AGUA DE ALIMENTACAO
