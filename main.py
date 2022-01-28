@@ -179,6 +179,13 @@ def get_sensor_data():
     if order_of_line2_in_json == 3:
         full_json = full_json+line2
 
+    temp_string = """, "datetime":" """
+    temp_string = temp_string[:-1]
+    date_now = str(datetime.now())
+    temp_string2 = """ "} """
+    temp_string2 = temp_string2[1:]
+    temp_string2 = temp_string2[:-1]
+    full_json = full_json[:-1]+temp_string+date_now+temp_string2
     print("full response in json format: " , full_json)
     #import pdb; pdb.set_trace()
 
@@ -212,6 +219,7 @@ def get_sensor_data():
           tds_list, moisture_list, tank_tds, tank_ph)
 
     #LOG SENSOR DATA
+
     collection = db.collection("sensor_data")
     collection.create()
     collection.store(full_json)
@@ -304,6 +312,8 @@ def feed(queue, week):
     for vase in queue:
 
         sleep_time = 10
+        counter = 0
+        irrigation_events = 7
         turn_shaker_on()
 
         print("tds: ", float(tds))
@@ -311,7 +321,8 @@ def feed(queue, week):
         print("maximum tds: ", todays_tds+10)
 
         #tds comeca maior pois ha nutrientes ainda na terra antiga provavelmente
-        while (todays_tds-10 <= float(tds) <= todays_tds+10) == False:
+        while counter < irrigation_events:
+        #while (todays_tds-10 <= float(tds) <= todays_tds+10) == False:
 
             tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
             turn_drainage_on()
@@ -340,6 +351,7 @@ def feed(queue, week):
                 collection.store(log_data)
 
                 tds = tds_list[0]
+                counter = counter +1
 
             if vase == 1:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
@@ -364,6 +376,8 @@ def feed(queue, week):
                 collection.store(log_data)
 
                 tds = tds_list[1]
+                counter = counter +1
+
 
             if vase == 2:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
@@ -388,6 +402,8 @@ def feed(queue, week):
                 collection.store(log_data)
 
                 tds = tds_list[2]
+                counter = counter +1
+
 
             if vase == 3:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
@@ -412,6 +428,8 @@ def feed(queue, week):
                 collection.store(log_data)
 
                 tds = tds_list[3]
+                counter = counter +1
+
 
             if vase == 4:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
@@ -436,6 +454,8 @@ def feed(queue, week):
                 collection.store(log_data)
 
                 tds = tds_list[4]
+                counter = counter +1
+
 
             if vase == 5:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
@@ -460,6 +480,8 @@ def feed(queue, week):
                 collection.store(log_data)
 
                 tds = tds_list[5]
+                counter = counter +1
+
 
             if vase == 6:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
@@ -484,6 +506,8 @@ def feed(queue, week):
                 collection.store(log_data)
 
                 tds = tds_list[6]
+                counter = counter +1
+
 
             if vase == 7:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
@@ -508,6 +532,7 @@ def feed(queue, week):
                 collection.store(log_data)
 
                 tds = tds_list[7]
+                counter = counter +1
 
             if vase == 8:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
@@ -532,6 +557,8 @@ def feed(queue, week):
                 collection.store(log_data)
 
                 tds = tds_list[8]
+                counter = counter +1
+
         else:
             if vase == 0:
                 print("finished feeding vase 1")
