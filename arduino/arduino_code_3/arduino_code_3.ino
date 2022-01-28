@@ -8,6 +8,7 @@
 // exemplo: { 'vaso_9': { 'tds': [0-1023], 'umidade': [0-1023]}, 'tanque': { 'tds': [0-1023], 'pH': [0-1023]} }
 
 #include <EEPROM.h>
+#include "MovingAverage.h"
 
 #define TdsSensorPin0 A0
 #define TdsSensorPin1 A2
@@ -16,6 +17,16 @@
 
 #define pHSensorPin0 A3
 #define pHTempSensorPin0 A4
+
+MovingAverage<unsigned> tds0(30, 2);
+MovingAverage<unsigned> tds1(30, 2);
+
+MovingAverage<unsigned> moist0(30, 2);
+
+MovingAverage<unsigned> ph0(30, 2);
+MovingAverage<unsigned> temp0(30, 2);
+
+
 
 void setup()
 {
@@ -41,16 +52,29 @@ void loop()
     float rawEc0 = analogRead(TdsSensorPin0) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float ec0 = (rawEc0 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
     float tdsValue0 = ec0*tdsEcCoef;
+    tds0.push(tdsValue0);
 
     float rawEc1 = analogRead(TdsSensorPin1) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float ec1 = (rawEc1 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
     float tdsValue1 = ec1*tdsEcCoef;
+    tds1.push(tdsValue1);
   
     MoistSensorValue0 = analogRead(MoistSensorPin0);
-    MoistSensorValue0 = analogRead(MoistSensorPin0);
+    moist0.push(MoistSensorValue0);
 
     int pHSensorValue0 = analogRead(pHSensorPin0);
-    int pHTempSensorValue0 = analogRead(pHTempSensorPin0);
+    ph0.push(pHSensorValue0);
+    
+    int pHTempSensorValue0 = analogRead(pHTempSensorPin0);   
+    temp0.push(pHTempSensorValue0); 
+    
+    tdsValue0 = tds0.get();
+    tdsValue1 = tds1.get();
+
+    MoistSensorValue0 = moist0.get(); 
+
+    pHSensorValue0 = ph0.get(); 
+    pHTempSensorValue0 = temp0.get();
 
 
     Serial.print("3-\"vaso_9\":{\"tds\":\"");
