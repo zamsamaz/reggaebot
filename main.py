@@ -13,7 +13,7 @@ import sys
 from unqlite import UnQLite
 
 print("starting setup")
-db = UnQLite("greenutils/db")
+db = UnQLite("greenutils/db.log")
 print("db set")
 print("fetching config file")
 config = open('config.json',mode='r')
