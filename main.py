@@ -10,8 +10,11 @@ import json
 from greenutils import GHMicroGrowChart as GH
 import serial
 import sys
+from unqlite import UnQLite
 
 print("starting setup")
+db = UnQLite("greenutils/db")
+print("db set")
 print("fetching config file")
 config = open('config.json',mode='r')
 config = json.load(config)
@@ -208,7 +211,11 @@ def get_sensor_data():
     print("get_sensors results: ",
           tds_list, moisture_list, tank_tds, tank_ph)
 
-    #LOG THIS
+    #LOG SENSOR DATA
+    collection = db.collection("sensor_data")
+    collection.create()
+    collection.store(full_json)
+
     return tds_list, moisture_list, tank_tds, tank_ph
 
 
@@ -315,12 +322,23 @@ def feed(queue, week):
                     create_nutritive_solution(todays_nutes)
                     #LOG THIS
 
+                start_time = datetime.now()
+                log_data = {"start_time":str(start_time), "vase":"1"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 print("feeding vase 1")
-                #LOG THIS
                 gpio.output(vase_1_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
-                #LOG THIS
                 gpio.output(vase_1_relay_pin, gpio.LOW)
+
+                end_time = datetime.now()
+                log_data = {"end_time":str(end_time), "vase":"1"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 tds = tds_list[0]
 
             if vase == 1:
@@ -328,10 +346,23 @@ def feed(queue, week):
                     gpio.output(vase_2_relay_pin, gpio.LOW)
                     create_nutritive_solution(todays_nutes)
 
+                start_time = datetime.now()
+                log_data = {"start_time":str(start_time), "vase":"2"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 print("feeding vase 2")
                 gpio.output(vase_2_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
                 gpio.output(vase_2_relay_pin, gpio.LOW)
+
+                end_time = datetime.now()
+                log_data = {"end_time":str(end_time), "vase":"2"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 tds = tds_list[1]
 
             if vase == 2:
@@ -339,10 +370,23 @@ def feed(queue, week):
                     gpio.output(vase_3_relay_pin, gpio.LOW)
                     create_nutritive_solution(todays_nutes)
 
+                start_time = datetime.now()
+                log_data = {"start_time":str(start_time), "vase":"3"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 print("feeding vase 3")
                 gpio.output(vase_3_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
                 gpio.output(vase_3_relay_pin, gpio.LOW)
+
+                end_time = datetime.now()
+                log_data = {"end_time":str(end_time), "vase":"3"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 tds = tds_list[2]
 
             if vase == 3:
@@ -350,10 +394,23 @@ def feed(queue, week):
                     gpio.output(vase_4_relay_pin, gpio.LOW)
                     create_nutritive_solution(todays_nutes)
 
+                start_time = datetime.now()
+                log_data = {"start_time":str(start_time), "vase":"4"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 print("feeding vase 4")
                 gpio.output(vase_4_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
                 gpio.output(vase_4_relay_pin, gpio.LOW)
+
+                end_time = datetime.now()
+                log_data = {"end_time":str(end_time), "vase":"4"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 tds = tds_list[3]
 
             if vase == 4:
@@ -361,10 +418,23 @@ def feed(queue, week):
                     gpio.output(vase_5_relay_pin, gpio.LOW)
                     create_nutritive_solution(todays_nutes)
 
+                start_time = datetime.now()
+                log_data = {"start_time":str(start_time), "vase":"5"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 print("feeding vase 5")
                 gpio.output(vase_5_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
                 gpio.output(vase_5_relay_pin, gpio.LOW)
+
+                end_time = datetime.now()
+                log_data = {"end_time":str(end_time), "vase":"5"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 tds = tds_list[4]
 
             if vase == 5:
@@ -372,10 +442,23 @@ def feed(queue, week):
                     gpio.output(vase_6_relay_pin, gpio.LOW)
                     create_nutritive_solution(todays_nutes)
 
+                start_time = datetime.now()
+                log_data = {"start_time":str(start_time), "vase":"6"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 print("feeding vase 6")
                 gpio.output(vase_6_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
                 gpio.output(vase_6_relay_pin, gpio.LOW)
+
+                end_time = datetime.now()
+                log_data = {"end_time":str(end_time), "vase":"6"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 tds = tds_list[5]
 
             if vase == 6:
@@ -383,10 +466,23 @@ def feed(queue, week):
                     gpio.output(vase_7_relay_pin, gpio.LOW)
                     create_nutritive_solution()
 
+                start_time = datetime.now()
+                log_data = {"start_time":str(start_time), "vase":"7"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 print("feeding vase 7")
                 gpio.output(vase_7_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
                 gpio.output(vase_7_relay_pin, gpio.LOW)
+
+                end_time = datetime.now()
+                log_data = {"end_time":str(end_time), "vase":"7"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 tds = tds_list[6]
 
             if vase == 7:
@@ -394,10 +490,23 @@ def feed(queue, week):
                     gpio.output(vase_8_relay_pin, gpio.LOW)
                     create_nutritive_solution(todays_nutes)
 
+                start_time = datetime.now()
+                log_data = {"start_time":str(start_time), "vase":"8"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 print("feeding vase 8")
                 gpio.output(vase_8_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
                 gpio.output(vase_8_relay_pin, gpio.LOW)
+
+                end_time = datetime.now()
+                log_data = {"end_time":str(end_time), "vase":"8"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 tds = tds_list[7]
 
             if vase == 8:
@@ -405,10 +514,23 @@ def feed(queue, week):
                     gpio.output(vase_9_relay_pin, gpio.LOW)
                     create_nutritive_solution(todays_nutes)
 
+                start_time = datetime.now()
+                log_data = {"start_time":str(start_time), "vase":"9"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 print("feeding vase 9")
                 gpio.output(vase_9_relay_pin, gpio.HIGH)
                 sleep(sleep_time)
                 gpio.output(vase_9_relay_pin, gpio.LOW)
+
+                end_time = datetime.now()
+                log_data = {"end_time":str(end_time), "vase":"9"}
+                collection = db.collection("feed_data")
+                collection.create()
+                collection.store(log_data)
+
                 tds = tds_list[8]
         else:
             if vase == 0:
