@@ -298,8 +298,6 @@ def feed(queue, week):
 
         sleep_time = 10
         turn_shaker_on()
-        sleep(10)
-        turn_shaker_off()
 
         print("tds: ", float(tds))
         print("minimum tds: ", todays_tds-10)
@@ -442,6 +440,7 @@ def feed(queue, week):
                 gpio.output(vase_9_relay_pin, gpio.LOW)
             sleep(20)
             turn_drainage_off()
+        turn_shaker_off()
 
 def create_nutritive_solution(todays_nutes):
 
@@ -548,10 +547,10 @@ def turn_shaker_off():
 def log_event_on_database(event, caller):
     return 0
 
-if sys.argv[1] == "control-mode":
-    tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
-    import pdb; pdb.set_trace()
-    tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
+#if sys.argv[1] == "control-mode":
+#    tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
+#    import pdb; pdb.set_trace()
+#    tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
 
 while True:
     print("000- checking sensors to see if plants need nutes")
