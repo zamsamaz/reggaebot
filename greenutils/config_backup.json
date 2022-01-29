@@ -1,8 +1,8 @@
 {
   "minimum_moisture": "665",
   "init_date" : "Dec 20 2021  1:00PM",
-  "ideal_ph" : "2.58",
-  "min_ph" : "2.63",
-  "max_ph" : "2.53",
+  "ideal_ph" : "600",
+  "min_ph" : "610",
+  "max_ph" : "590",
   "tank_capacity" : "10"
 }

@@ -23,10 +23,12 @@ MovingAverage<unsigned> tds1(30, 2);
 
 MovingAverage<unsigned> moist0(30, 2);
 
-MovingAverage<unsigned> ph0(30, 2);
 MovingAverage<unsigned> temp0(30, 2);
 
-
+int sensorValue = 0;
+unsigned long int avgValue;
+float b;
+int buf[10], temp;
 
 void setup()
 {
@@ -62,8 +64,36 @@ void loop()
     MoistSensorValue0 = analogRead(MoistSensorPin0);
     moist0.push(MoistSensorValue0);
 
-    int pHSensorValue0 = analogRead(pHSensorPin0);
-    ph0.push(pHSensorValue0);
+
+       for(int i = 0; i<10; i++)
+    {
+      buf[i]=analogRead(pHSensorPin0);
+      delay(10);
+    }
+    for(int i=0;i<9;i++)
+    {
+      for(int j=i+1;j<10;j++)
+      {
+        if (buf[i]>buf[j])
+        {
+          temp = buf[i];
+          buf[i]=buf[j];
+          buf[j]=temp;
+        }
+       }
+     }
+   avgValue =0;
+   for(int i=2;i<8;i++)
+   {
+    avgValue+=buf[i];
+   }
+   
+ 
+    
+    float pHVol=(float)avgValue*5.0/1024*0.135;
+    //float pHSensorValue0 = -9.9454 * pHVol + 29.1936;
+    float  pHSensorValue0 = pHVol;
+
     
     int pHTempSensorValue0 = analogRead(pHTempSensorPin0);   
     temp0.push(pHTempSensorValue0); 
@@ -73,7 +103,6 @@ void loop()
 
     MoistSensorValue0 = moist0.get(); 
 
-    pHSensorValue0 = ph0.get(); 
     pHTempSensorValue0 = temp0.get();
 
 

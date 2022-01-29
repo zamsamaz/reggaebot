@@ -313,7 +313,7 @@ def feed(queue, week):
 
         sleep_time = 10
         counter = 0
-        irrigation_events = 7
+        irrigation_events = 10 # of sleep_time duration each
         turn_shaker_on()
 
         print("tds: ", float(tds))
@@ -326,6 +326,8 @@ def feed(queue, week):
 
             tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
             turn_drainage_on()
+            print("irrigation event number: ", str(counter+1))
+            print("total irrigation events needed: ", str(irrigation_events))
 
             if vase == 0:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
@@ -486,7 +488,7 @@ def feed(queue, week):
             if vase == 6:
                 if not gpio.input(inferior_level_sensor_pin) and not gpio.input(inferior_level_sensor_failsafe_pin):
                     gpio.output(vase_7_relay_pin, gpio.LOW)
-                    create_nutritive_solution()
+                    create_nutritive_solution(todays_nutes)
 
                 start_time = datetime.now()
                 log_data = {"start_time":str(start_time), "vase":"7"}
@@ -647,27 +649,47 @@ def create_nutritive_solution(todays_nutes):
 
     print("nutes ready")
 
-    while (max_ph <= int(tank_ph) <= min_ph) == False:
+    filter_counter = 0
+    filter_list = []
+    while filter_counter < 10:
+        tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
+        filter_list.append(float(tank_ph))
+        filter_counter = filter_counter + 1
+        print("reading number: ", filter_counter)
+    tank_ph = sum(filter_list)/len(filter_list)
+    print("ph average voltage: ", tank_ph)
+
+    while (max_ph <= tank_ph <= min_ph) == False:
 
         print("adjusting ph")
         print("tank ph: " , tank_ph)
-        print("ideal ph: " , ph_ideal)
+        print("ideal ph: " , ideal_ph)
 
 
-        if int(tank_ph) > int(ph_ideal):
+        if tank_ph < ideal_ph:
             print("increasing ph")
             gpio.output(phup_peristaltic_relay_pin, gpio.HIGH)
-            sleep(0.1)
+            sleep(0.5)
             gpio.output(phup_peristaltic_relay_pin, gpio.LOW)
 
-        if int(tank_ph) < int(ph_ideal):
+        if tank_ph > ideal_ph:
             print("decreasing ph")
             gpio.output(phdown_peristaltic_relay_pin, gpio.HIGH)
-            sleep(0.1)
+            sleep(0.5)
             gpio.output(phdown_peristaltic_relay_pin, gpio.LOW)
 
-        tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
-        sleep(120)
+        sleep(20)
+        filter_counter = 0
+        filter_list = []
+        while filter_counter < 10:
+            tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
+            filter_list.append(float(tank_ph))
+            filter_counter = filter_counter + 1
+            print("reading number: ", filter_counter)
+        tank_ph = sum(filter_list)/len(filter_list)
+        print("ph average voltage: ", tank_ph)
+
+
     turn_shaker_off()
     print("tank refueled and ready!")
     return 1
@@ -678,7 +700,7 @@ def turn_drainage_on():
     gpio.output(drainage_relay_pin, gpio.HIGH)
 
 
-def turn_shaker_off():
+def turn_drainage_off():
     print("turning drainage off")
     gpio.output(drainage_relay_pin, gpio.LOW)
 

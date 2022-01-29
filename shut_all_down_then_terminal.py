@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+#-*- coding: utf-8 -*-
+
 import RPi.GPIO as gpio
 gpio.setmode(gpio.BOARD)
 
