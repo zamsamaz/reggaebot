@@ -11,7 +11,6 @@
 // exemplo: { 'vaso_1': { 'tds': [0-1023], 'umidade': [0-1023]}, 'vaso_2': { 'tds': [0-1023], 'umidade': [0-1023]}, ... }
 
 #include <EEPROM.h>
-#include "MovingAverage.h"
 
 
 
@@ -24,16 +23,6 @@
 #define MoistSensorPin1 A3
 #define MoistSensorPin2 A5
 #define MoistSensorPin3 A7
-
-MovingAverage<unsigned> moist0(30, 2);
-MovingAverage<unsigned> moist1(30, 2);
-MovingAverage<unsigned> moist2(30, 2);
-MovingAverage<unsigned> moist3(30, 2);
-
-MovingAverage<unsigned> tds0(30, 2);
-MovingAverage<unsigned> tds1(30, 2);
-MovingAverage<unsigned> tds2(30, 2);
-MovingAverage<unsigned> tds3(30, 2);
 
 
 
@@ -67,45 +56,27 @@ void loop()
     float rawEc0 = analogRead(TdsSensorPin0) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float ec0 = (rawEc0 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
     float tdsValue0 = ec0*tdsEcCoef;
-    tds0.push(tdsValue0);
 
     float rawEc1 = analogRead(TdsSensorPin1) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float ec1 = (rawEc1 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
     float tdsValue1 = ec1*tdsEcCoef;
-    tds1.push(tdsValue1);
     
     float rawEc2 = analogRead(TdsSensorPin2) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float ec2 = (rawEc2 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
     float tdsValue2 = ec2*tdsEcCoef;
-    tds2.push(tdsValue2);
     
     float rawEc3 = analogRead(TdsSensorPin3) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float ec3 = (rawEc3 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
     float tdsValue3 = ec3*tdsEcCoef;
-    tds3.push(tdsValue3);
 
     MoistSensorValue0 = analogRead(MoistSensorPin0);
-    moist0.push(MoistSensorValue0);
 
     MoistSensorValue1 = analogRead(MoistSensorPin1);
-    moist1.push(MoistSensorValue1);
 
     MoistSensorValue2 = analogRead(MoistSensorPin2);
-    moist2.push(MoistSensorValue2);
 
     MoistSensorValue3 = analogRead(MoistSensorPin3);
-    moist3.push(MoistSensorValue3);
     
-    tdsValue0 = tds0.get();
-    tdsValue1 = tds1.get();
-    tdsValue2 = tds2.get();
-    tdsValue3 = tds3.get();
-
-    MoistSensorValue0 = moist0.get(); 
-    MoistSensorValue1 = moist1.get(); 
-    MoistSensorValue2 = moist2.get(); 
-    MoistSensorValue3 = moist3.get(); 
-
 
     Serial.print("1-{\"vaso_1\":{\"tds\":\"");
     Serial.print(tdsValue0);
@@ -125,6 +96,6 @@ void loop()
     Serial.print(MoistSensorValue3);
     Serial.print("\"},");
     Serial.print("fim");
-    delay(1000);
+    delay(400);
 
 }

@@ -19,6 +19,7 @@ print("fetching config file")
 config = open('config.json',mode='r')
 config = json.load(config)
 init_date = config['init_date']
+irrigation_events = int(config['irrigation_events'])
 ideal_ph = float(config['ideal_ph'])
 min_ph = float(config['min_ph'])
 max_ph = float(config['max_ph'])
@@ -104,7 +105,7 @@ def get_sensor_data():
     print("obtaining sensor data")
     full_json = ""
     ser0.reset_input_buffer()
-    sleep(2)
+    sleep(0.6)
     #ser2.reset_input_buffer();sleep(1);
     #import pdb; pdb.set_trace()
     line0 = ser0.readall().decode('utf-8')
@@ -123,7 +124,7 @@ def get_sensor_data():
 
 
     ser1.reset_input_buffer()
-    sleep(2)
+    sleep(0.6)
     line1 = ser1.readall().decode('utf-8')
     if line1.find("1-") != -1:
         start_index_line1 = line1.find("1-")+2
@@ -139,7 +140,7 @@ def get_sensor_data():
     print("serial 2 response: ", line1)
 
     ser2.reset_input_buffer()
-    sleep(2)
+    sleep(0.6)
     line2 = ser2.readall().decode('utf-8')
 
     if line2.find("1-") != -1:
@@ -313,7 +314,7 @@ def feed(queue, week):
 
         sleep_time = 10
         counter = 0
-        irrigation_events = 10 # of sleep_time duration each
+        global irrigation_events # of sleep_time duration each
         turn_shaker_on()
 
         print("tds: ", float(tds))
