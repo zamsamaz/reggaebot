@@ -18,20 +18,17 @@
 #define pHTempSensorPin0 A4
 
 
-int sensorValue = 0;
-unsigned long int avgValue;
-float b;
-int buf[10], temp;
-
 void setup()
 {
-    Serial.begin(115200);
+
+
+  Serial.begin(115200);
     pinMode(TdsSensorPin0,INPUT);
     pinMode(TdsSensorPin1,INPUT);
     pinMode(MoistSensorPin0,INPUT);
     pinMode(pHSensorPin0,INPUT);
     pinMode(pHTempSensorPin0,INPUT);
-
+analogReference(DEFAULT);
 }
 
 void loop()
@@ -54,35 +51,18 @@ void loop()
   
     MoistSensorValue0 = analogRead(MoistSensorPin0);
 
-
-       for(int i = 0; i<10; i++)
-    {
-      buf[i]=analogRead(pHSensorPin0);
-      delay(10);
-    }
-    for(int i=0;i<9;i++)
-    {
-      for(int j=i+1;j<10;j++)
-      {
-        if (buf[i]>buf[j])
-        {
-          temp = buf[i];
-          buf[i]=buf[j];
-          buf[j]=temp;
-        }
-       }
-     }
-   avgValue =0;
-   for(int i=2;i<8;i++)
-   {
-    avgValue+=buf[i];
-   }
-   
- 
+    int accumulator;
     
-    float pHVol=(float)avgValue*5.0/1024*0.135;
-    //float pHSensorValue0 = -9.9454 * pHVol + 29.1936;
-    float  pHSensorValue0 = pHVol;
+    for(int i=0;i<30;i++)
+    {
+      accumulator = accumulator + analogRead(pHSensorPin0);
+    }
+      
+    float  pHSensorValue0 = accumulator/30;
+    
+    //float pHVol=(float)pHSensorValue0*5.03/1024;//*0.8166;//*0.135;
+    //HSensorValue0 = -5.61224 * pHVol + 21.0667344;//-0.178181 * pHVol + 3.753709;
+    //pHSensorValue0 = pHVol;
 
     
     int pHTempSensorValue0 = analogRead(pHTempSensorPin0);   
@@ -100,6 +80,6 @@ void loop()
     Serial.print(pHTempSensorValue0);
     Serial.print("\"}}");
     Serial.print("fim");
-    delay(400);
+    delay(700);
 
 }

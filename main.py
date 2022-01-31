@@ -105,7 +105,7 @@ def get_sensor_data():
     print("obtaining sensor data")
     full_json = ""
     ser0.reset_input_buffer()
-    sleep(0.6)
+    sleep(1.2)
     #ser2.reset_input_buffer();sleep(1);
     #import pdb; pdb.set_trace()
     line0 = ser0.readall().decode('utf-8')
@@ -120,11 +120,11 @@ def get_sensor_data():
         order_of_line0_in_json = 3
     end_index_line0 = line0.find("fim", start_index_line0)
     line0 = line0[start_index_line0:end_index_line0]
-    print("serial 1 response: ", line0)
+    #print("serial 1 response: ", line0)
 
 
     ser1.reset_input_buffer()
-    sleep(0.6)
+    sleep(1.2)
     line1 = ser1.readall().decode('utf-8')
     if line1.find("1-") != -1:
         start_index_line1 = line1.find("1-")+2
@@ -137,10 +137,10 @@ def get_sensor_data():
         order_of_line1_in_json = 3
     end_index_line1 = line1.find("fim", start_index_line1)
     line1 = line1[start_index_line1:end_index_line1]
-    print("serial 2 response: ", line1)
+    #print("serial 2 response: ", line1)
 
     ser2.reset_input_buffer()
-    sleep(0.6)
+    sleep(1.2)
     line2 = ser2.readall().decode('utf-8')
 
     if line2.find("1-") != -1:
@@ -154,7 +154,7 @@ def get_sensor_data():
         order_of_line2_in_json = 3
     end_index_line2 = line2.find("fim", start_index_line2)
     line2 = line2[start_index_line2:end_index_line2]
-    print("serial 3 response: ", line2)
+    #print("serial 3 response: ", line2)
 
 
 

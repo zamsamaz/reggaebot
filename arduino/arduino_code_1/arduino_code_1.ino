@@ -96,6 +96,6 @@ void loop()
     Serial.print(MoistSensorValue3);
     Serial.print("\"},");
     Serial.print("fim");
-    delay(400);
+    delay(700);
 
 }
