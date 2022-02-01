@@ -5,7 +5,7 @@
 // Temperatura dos vasos (pino D12)
 // Temperatura do tanque (pin A4)
 // as infos sao mandadas via serial no formato de um python dict (JSON)
-// exemplo: { 'vaso_9': { 'tds': [0-1023], 'umidade': [0-1023]}, 'tanque': { 'tds': [0-1023], 'pH': [0-1023]} }
+// exemplo: { 'vaso_9': { 'tds': [0-1023], 'umidade': [0-1023]}, 'tanque': { 'tds': [0-1023]} }
 
 #include <EEPROM.h>
 
@@ -14,21 +14,15 @@
 
 #define MoistSensorPin0 A1
 
-#define pHSensorPin0 A3
-#define pHTempSensorPin0 A4
-
 
 void setup()
 {
 
-
-  Serial.begin(115200);
+    Serial.begin(115200);
     pinMode(TdsSensorPin0,INPUT);
     pinMode(TdsSensorPin1,INPUT);
     pinMode(MoistSensorPin0,INPUT);
-    pinMode(pHSensorPin0,INPUT);
-    pinMode(pHTempSensorPin0,INPUT);
-analogReference(DEFAULT);
+
 }
 
 void loop()
@@ -40,7 +34,7 @@ void loop()
     float aref = 5.0;
     float ecCalibration = 1;
     float temperatureCoefficient = 1.0 + 0.02 * (25.0 - 25.0); // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
-    
+
     float rawEc0 = analogRead(TdsSensorPin0) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float ec0 = (rawEc0 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
     float tdsValue0 = ec0*tdsEcCoef;
@@ -48,25 +42,9 @@ void loop()
     float rawEc1 = analogRead(TdsSensorPin1) * aref / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
     float ec1 = (rawEc1 / temperatureCoefficient) * ecCalibration; // temperature and calibration compensation
     float tdsValue1 = ec1*tdsEcCoef;
-  
+
     MoistSensorValue0 = analogRead(MoistSensorPin0);
 
-    int accumulator;
-    
-    for(int i=0;i<30;i++)
-    {
-      accumulator = accumulator + analogRead(pHSensorPin0);
-    }
-      
-    float  pHSensorValue0 = accumulator/30;
-    
-    //float pHVol=(float)pHSensorValue0*5.03/1024;//*0.8166;//*0.135;
-    //HSensorValue0 = -5.61224 * pHVol + 21.0667344;//-0.178181 * pHVol + 3.753709;
-    //pHSensorValue0 = pHVol;
-
-    
-    int pHTempSensorValue0 = analogRead(pHTempSensorPin0);   
-   
 
     Serial.print("3-\"vaso_9\":{\"tds\":\"");
     Serial.print(tdsValue0);
@@ -74,10 +52,6 @@ void loop()
     Serial.print(MoistSensorValue0);
     Serial.print("\"},\"tanque\":{\"tds\":\"");
     Serial.print(tdsValue1);
-    Serial.print("\",\"pH\":\"");
-    Serial.print(pHSensorValue0);
-    Serial.print("\",\"temp\":\"");
-    Serial.print(pHTempSensorValue0);
     Serial.print("\"}}");
     Serial.print("fim");
     delay(700);

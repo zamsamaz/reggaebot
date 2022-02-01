@@ -1,16 +1,17 @@
 #!/usr/bin/python3
 #-*- coding: utf-8 -*-
 
-# to start app normally run "./main.py", to enter control mode, run "./main.py control-mode"
 
 import RPi.GPIO as gpio
 from time import sleep
 from datetime import datetime
 import json
-from greenutils import GHMicroGrowChart as GH
+from greenutils import GHMicroGrowChart as GHMicro
+from greenutils import GHMFloraNovaGrowChart as GHFloraNova
 import serial
 import sys
 from unqlite import UnQLite
+import smbus
 
 print("starting setup")
 db = UnQLite("greenutils/db.log")
@@ -20,6 +21,7 @@ config = open('config.json',mode='r')
 config = json.load(config)
 init_date = config['init_date']
 irrigation_events = int(config['irrigation_events'])
+nute_type = config['nute_type'] #"floranova" or "micro"
 ideal_ph = float(config['ideal_ph'])
 min_ph = float(config['min_ph'])
 max_ph = float(config['max_ph'])
@@ -50,7 +52,11 @@ solenoid_pin = 38
 gpio.setup(solenoid_pin, gpio.OUT)
 
 # SETUP DO RELE DA BOMBA DE DRENAGEM
-drainage_relay_pin = 5
+if nute_type == "floranova":
+    drainage_relay_pin = 11
+if nute_type == "micro":
+    drainage_relay_pin = 99
+
 gpio.setup(drainage_relay_pin, gpio.OUT)
 
 # SETUP DOS PINOS DOS RELES DE BOMBAS DE AGUA DE ALIMENTACAO
@@ -78,6 +84,12 @@ shaker_relay_pin = 31
 gpio.setup(shaker_relay_pin, gpio.OUT)
 
 # SETUP DOS PINOS DAS BOMBAS PERISTALTICAS
+
+##### IMPORTANTE #####
+# Quando usando floranova, utilizar a peristaltica bloom para ambos os nutes nomeados bloom
+# o pino 11, que seria da peristaltica gro no esquema micro é reutilizado para criar o dreno ativo quando usando floranova
+##### IMPORTANTE #####
+
 bloom_peristaltic_relay_pin = 7
 gpio.setup(bloom_peristaltic_relay_pin, gpio.OUT)
 gro_peristaltic_relay_pin = 11
@@ -99,6 +111,11 @@ ser2 = serial.Serial('/dev/ttyUSB2', 115200, timeout=0.1)
 
 print("serial set")
 
+print("setting i2c")
+i2c_address = 0x48
+i2c_A0 = 0x40
+i2c_ch = 0
+print("i2c set")
 
 def get_sensor_data():
 
@@ -215,9 +232,8 @@ def get_sensor_data():
     moisture_list.append(full_json["vaso_9"]["umidade"])
 
     tank_tds = full_json["tanque"]["tds"]
-    tank_ph = full_json["tanque"]["pH"]
     print("get_sensors results: ",
-          tds_list, moisture_list, tank_tds, tank_ph)
+          tds_list, moisture_list, tank_tds)
 
     #LOG SENSOR DATA
 
@@ -225,7 +241,7 @@ def get_sensor_data():
     collection.create()
     collection.store(full_json)
 
-    return tds_list, moisture_list, tank_tds, tank_ph
+    return tds_list, moisture_list, tank_tds
 
 
 def update_feeding_queue(moisture_list):
@@ -280,10 +296,20 @@ def feed(queue, week):
     tds = 0
     tank_capacity = 7 #7 litros
     print("getting growchart")
-    growchart_getter = GH.Getters()
-    todays_nutes = growchart_getter.get_nutrient_parameters_by_week_and_feeding_regime(week, "medium")
-    todays_tds = (float(todays_nutes["PPM range (500 scale)"].split('-')[0])+float(todays_nutes["PPM range (500 scale)"].split('-')[1]))/2
-    print("today's nutes calculated")
+
+    if nute_type == "micro":
+
+        growchart_getter = GHMicro.Getters()
+        todays_nutes = growchart_getter.get_nutrient_parameters_by_week_and_feeding_regime(week, "medium")
+        todays_tds = (float(todays_nutes["PPM range (500 scale)"].split('-')[0])+float(todays_nutes["PPM range (500 scale)"].split('-')[1]))/2
+        print("today's nutes calculated")
+
+    if nute_type == "floranova":
+
+        growchart_getter = GHFloraNova.Getters()
+        todays_nutes = growchart_getter.get_nutrient_parameters_by_week(week)
+        todays_tds = (float(todays_nutes["max PPM"])
+        print("today's nutes calculated")
 
     global superior_level_sensor_pin
     global inferior_level_sensor_pin
@@ -315,7 +341,6 @@ def feed(queue, week):
         sleep_time = 10
         counter = 0
         global irrigation_events # of sleep_time duration each
-        turn_shaker_on()
 
         print("tds: ", float(tds))
         print("minimum tds: ", todays_tds-10)
@@ -325,8 +350,10 @@ def feed(queue, week):
         while counter < irrigation_events:
         #while (todays_tds-10 <= float(tds) <= todays_tds+10) == False:
 
-            tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
+            tds_list, moisture_list, tank_tds = get_sensor_data()
             turn_drainage_on()
+            turn_shaker_on()
+
             print("irrigation event number: ", str(counter+1))
             print("total irrigation events needed: ", str(irrigation_events))
 
@@ -594,71 +621,15 @@ def feed(queue, week):
             turn_drainage_off()
         turn_shaker_off()
 
-def create_nutritive_solution(todays_nutes):
 
-    #import pdb; pdb.set_trace()
-    print("empty tank, preparing nutritive solution")
 
-    while gpio.input(superior_level_sensor_pin) == 0:
-        gpio.output(solenoid_pin, gpio.HIGH)
-        sleep(0.1)
-        if gpio.input(superior_level_sensor_pin) == 0:
-            continue
+def adjust_ph(expected_ph):
 
-    gpio.output(solenoid_pin, gpio.LOW)
-    #faz solucao nutritiva
-    global tank_capacity
-    growchart_getter = GH.Getters()
-    todays_nutes = growchart_getter.adjust_solution_quantities_based_on_tank_capacity(todays_nutes, tank_capacity)
-    todays_tds = todays_nutes["PPM range (500 scale)"]
-    todays_micro = float(todays_nutes["FloraMicro"])
-    todays_gro = float(todays_nutes["FloraGro"])
-    todays_bloom = float(todays_nutes["FloraBloom"])
-    todays_tds = todays_tds.split('-')
-    todays_minimum_tds, todays_maximum_tds = float(todays_tds[0]), float(todays_tds[1])
-    total_nutes = todays_gro + todays_bloom + todays_micro
-    proportion_gro = todays_gro * (1/total_nutes)
-    proportion_bloom = todays_bloom * (1/total_nutes)
-    proportion_micro = todays_micro * (1/total_nutes)
-    print("turning the shaker on and sleeping 30 secs")
     turn_shaker_on()
-    sleep(30)
-    tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
-
-    # as bombas peristalticas tem vazao de 40ml/min com 12v -> 0.666ml/s
-    while (float(todays_minimum_tds) <= float(tank_tds) <= float(todays_maximum_tds)) == False:
-
-        print("adding nutes until the sensor hits correct week tds")
-        print("tank tds: " , tank_tds)
-        print("minimum tds for today: " , todays_minimum_tds)
-        print("adding bloom")
-        gpio.output(bloom_peristaltic_relay_pin, gpio.HIGH)
-        sleep(proportion_bloom*0.6)
-        gpio.output(bloom_peristaltic_relay_pin, gpio.LOW)
-
-        print("adding gro")
-        gpio.output(gro_peristaltic_relay_pin, gpio.HIGH)
-        sleep(proportion_gro*0.6)
-        gpio.output(gro_peristaltic_relay_pin, gpio.LOW)
-
-        print("adding micro")
-        gpio.output(micro_peristaltic_relay_pin, gpio.HIGH)
-        sleep(proportion_micro*0.6)
-        gpio.output(micro_peristaltic_relay_pin, gpio.LOW)
-
-        tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
-
-    print("nutes ready")
-
-    filter_counter = 0
-    filter_list = []
-    while filter_counter < 10:
-        tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
-        filter_list.append(float(tank_ph))
-        filter_counter = filter_counter + 1
-        print("reading number: ", filter_counter)
-    tank_ph = sum(filter_list)/len(filter_list)
-    print("ph average voltage: ", tank_ph)
+    global i2c_ch, i2c_address, i2c_A0, max_ph, min_ph, ideal_ph
+    bus = smbus.SMBus(i2c_ch)
+    bus.write_byte(i2c_address,i2c_A0)
+    tank_ph = bus.read_byte(i2c_address)
 
     while (max_ph <= tank_ph <= min_ph) == False:
 
@@ -679,20 +650,92 @@ def create_nutritive_solution(todays_nutes):
             sleep(0.5)
             gpio.output(phdown_peristaltic_relay_pin, gpio.LOW)
 
-        sleep(20)
-        filter_counter = 0
-        filter_list = []
-        while filter_counter < 10:
-            tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
-            filter_list.append(float(tank_ph))
-            filter_counter = filter_counter + 1
-            print("reading number: ", filter_counter)
-        tank_ph = sum(filter_list)/len(filter_list)
-        print("ph average voltage: ", tank_ph)
-
+        sleep(30)
+        bus.write_byte(i2c_address,i2c_A0)
+        tank_ph = bus.read_byte(i2c_address)
 
     turn_shaker_off()
+    return 1
+
+
+def create_nutritive_solution(todays_nutes):
+
+    #import pdb; pdb.set_trace()
+    print("empty tank, preparing nutritive solution")
+
+    while gpio.input(superior_level_sensor_pin) == 0:
+        gpio.output(solenoid_pin, gpio.HIGH)
+        sleep(0.1)
+        if gpio.input(superior_level_sensor_pin) == 0:
+            continue
+
+    gpio.output(solenoid_pin, gpio.LOW)
+    #faz solucao nutritiva
+    global tank_capacity
+
+    if nute_type == "micro":
+        growchart_getter = GHMicro.Getters()
+        todays_nutes = growchart_getter.adjust_solution_quantities_based_on_tank_capacity(todays_nutes, tank_capacity)
+        todays_tds = todays_nutes["PPM range (500 scale)"]
+        todays_micro = float(todays_nutes["FloraMicro"])
+        todays_gro = float(todays_nutes["FloraGro"])
+        todays_bloom = float(todays_nutes["FloraBloom"])
+        todays_tds = todays_tds.split('-')
+        todays_minimum_tds, todays_maximum_tds = float(todays_tds[0]), float(todays_tds[1])
+        total_nutes = todays_gro + todays_bloom + todays_micro
+        proportion_gro = todays_gro * (1/total_nutes)
+        proportion_bloom = todays_bloom * (1/total_nutes)
+        proportion_micro = todays_micro * (1/total_nutes)
+
+
+    if nute_type == "floranova":
+        todays_tds = float(todays_nutes["max PPM"])
+        todays_minimum_tds, todays_maximum_tds = todays_tds-30, todays_tds+30
+
+    print("turning the shaker on and sleeping 30 secs")
+    turn_shaker_on()
+    sleep(30)
+    tds_list, moisture_list, tank_tds = get_sensor_data()
+
+    # as bombas peristalticas tem vazao de 40ml/min com 12v -> 0.666ml/s
+    while (float(todays_minimum_tds) <= float(tank_tds) <= float(todays_maximum_tds)) == False:
+
+        print("adding nutes until the sensor hits correct week tds")
+        print("tank tds: " , tank_tds)
+        print("minimum tds for today: " , todays_minimum_tds)
+
+        if nute_type == "micro":
+
+            print("adding bloom")
+            gpio.output(bloom_peristaltic_relay_pin, gpio.HIGH)
+            sleep(proportion_bloom*0.6)
+            gpio.output(bloom_peristaltic_relay_pin, gpio.LOW)
+
+            print("adding gro")
+            gpio.output(gro_peristaltic_relay_pin, gpio.HIGH)
+            sleep(proportion_gro*0.6)
+            gpio.output(gro_peristaltic_relay_pin, gpio.LOW)
+
+            print("adding micro")
+            gpio.output(micro_peristaltic_relay_pin, gpio.HIGH)
+            sleep(proportion_micro*0.6)
+            gpio.output(micro_peristaltic_relay_pin, gpio.LOW)
+
+        if nute_type == "floranova":
+
+            print("adding floranova bloom")
+            gpio.output(bloom_peristaltic_relay_pin, gpio.HIGH)
+            sleep(0.5)
+            gpio.output(bloom_peristaltic_relay_pin, gpio.LOW)
+
+
+        tds_list, moisture_list, tank_tds = get_sensor_data()
+
+    print("nutes ready")
+    adjust_ph(ideal_ph)
+    turn_shaker_off()
     print("tank refueled and ready!")
+
     return 1
 
 
@@ -719,14 +762,10 @@ def turn_shaker_off():
 def log_event_on_database(event, caller):
     return 0
 
-#if sys.argv[1] == "control-mode":
-#    tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
-#    import pdb; pdb.set_trace()
-#    tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
 
 while True:
     print("000- checking sensors to see if plants need nutes")
-    tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
+    tds_list, moisture_list, tank_tds = get_sensor_data()
     print("000- updating feeding queue")
     queue = update_feeding_queue(moisture_list)
     print("000- queue : ", queue)
