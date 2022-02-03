@@ -5,6 +5,6 @@
   "min_ph" : "2.49",
   "max_ph" : "2.41",
   "tank_capacity" : "10",
-  "irrigation_events": "14",
+  "irrigation_events": "5",
   "nute_type": "floranova"
 }

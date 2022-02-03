@@ -89,8 +89,14 @@ gpio.setup(shaker_relay_pin, gpio.OUT)
 
 bloom_peristaltic_relay_pin = 7
 gpio.setup(bloom_peristaltic_relay_pin, gpio.OUT)
-gro_peristaltic_relay_pin = 11
-gpio.setup(gro_peristaltic_relay_pin, gpio.OUT)
+
+
+#gro_peristaltic_relay_pin = 11
+#gpio.setup(gro_peristaltic_relay_pin, gpio.OUT)
+
+drainage_relay_pin = 11
+gpio.setup(drainage_relay_pin, gpio.OUT)
+
 micro_peristaltic_relay_pin = 13
 gpio.setup(micro_peristaltic_relay_pin, gpio.OUT)
 phup_peristaltic_relay_pin = 15
@@ -334,7 +340,8 @@ def feed(queue, week):
         sleep_time = 10
         counter = 0
         global irrigation_events # of sleep_time duration each
-
+        turn_drainage_on()
+        sleep(sleep_time*3)
         print("tds: ", float(tds))
         print("minimum tds: ", todays_tds-10)
         print("maximum tds: ", todays_tds+10)
@@ -344,7 +351,6 @@ def feed(queue, week):
         #while (todays_tds-10 <= float(tds) <= todays_tds+10) == False:
 
             tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
-            turn_drainage_on()
             turn_shaker_on()
 
             print("irrigation event number: ", str(counter+1))
@@ -611,8 +617,9 @@ def feed(queue, week):
                 print("finished feeding vase 9")
                 gpio.output(vase_9_relay_pin, gpio.LOW)
             sleep(20)
-            turn_drainage_off()
+
         turn_shaker_off()
+        turn_drainage_off()
 
 
 
@@ -653,6 +660,7 @@ def create_nutritive_solution(todays_nutes):
 
     #import pdb; pdb.set_trace()
     print("empty tank, preparing nutritive solution")
+    turn_drainage_off()
 
     while gpio.input(superior_level_sensor_pin) == 0:
         gpio.output(solenoid_pin, gpio.HIGH)
@@ -756,6 +764,7 @@ def log_event_on_database(event, caller):
 
 while True:
     #import pdb;pdb.set_trace()
+    print("time now: ", datetime.now())
     print("000- checking sensors to see if plants need nutes")
     tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
     print("000- updating feeding queue")
@@ -764,5 +773,5 @@ while True:
     week = get_current_week(init_date)
     print("000- current week: ", week)
     feed(queue, week)
-    print("000- taking a nap")
+    print("000- taking a nap at: ", datetime.now())
     sleep(60*10)
