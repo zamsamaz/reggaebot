@@ -16,11 +16,6 @@
 #define phSensorPin1 A4
 
 #define MoistSensorPin0 A1
-//#define PCF8591 (0x48 >> 1)
-//#define ADC0 0x00
-//byte value0;
-
-
 
 void setup()
 {
@@ -35,7 +30,7 @@ void setup()
 void loop()
 {
     int MoistSensorValue0;
-    int tdsEcCoef = 280;
+    int tdsEcCoef = 380;
     float temperature = 25;
     float aref = 5.0;
     float ecCalibration = 1;
@@ -59,13 +54,7 @@ void loop()
     }
     ph = ph /100;
     ph = ph * aref / 1024.0;
-    
-        //Wire.beginTransmission(PCF8591);
-    //Wire.write(ADC0);
-    //Wire.endTransmission();
-    //Wire.requestFrom(PCF8591, 2);
-    //value0 = Wire.read();
-    //value0 = Wire.read();
+   
 
     Serial.print("3-\"vaso_9\":{\"tds\":\"");
     Serial.print(tdsValue0);

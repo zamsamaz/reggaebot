@@ -108,12 +108,6 @@ ser2 = serial.Serial('/dev/ttyUSB2', 115200, timeout=0.1)
 
 print("serial set")
 
-print("setting i2c")
-i2c_address = 0x48
-i2c_A0 = 0x40
-i2c_ch = 0
-print("i2c set")
-
 def get_sensor_data():
 
     print("obtaining sensor data")
@@ -240,7 +234,7 @@ def get_sensor_data():
     collection.create()
     collection.store(full_json)
 
-    return tds_list, moisture_list, tank_tds, tank_ph
+    return tds_list, moisture_list, tank_tds, float(tank_ph)
 
 
 def update_feeding_queue(moisture_list):
@@ -637,17 +631,17 @@ def adjust_ph(expected_ph):
         if tank_ph < ideal_ph:
             print("increasing ph")
             gpio.output(phup_peristaltic_relay_pin, gpio.HIGH)
-            sleep(0.5)
+            sleep(2)
             gpio.output(phup_peristaltic_relay_pin, gpio.LOW)
 
         if tank_ph > ideal_ph:
             print("decreasing ph")
             gpio.output(phdown_peristaltic_relay_pin, gpio.HIGH)
-            sleep(0.5)
+            sleep(2)
             gpio.output(phdown_peristaltic_relay_pin, gpio.LOW)
 
-        print("sleepping 45s at:", datetime.now())
-        sleep(45)
+        print("sleepping 60s at:", datetime.now())
+        sleep(60)
         print("waking up")
         tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
 
@@ -761,6 +755,7 @@ def log_event_on_database(event, caller):
 
 
 while True:
+    #import pdb;pdb.set_trace()
     print("000- checking sensors to see if plants need nutes")
     tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
     print("000- updating feeding queue")
