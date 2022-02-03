@@ -341,7 +341,9 @@ def feed(queue, week):
         counter = 0
         global irrigation_events # of sleep_time duration each
         turn_drainage_on()
-        sleep(sleep_time*3)
+        turn_shaker_on()
+        sleep(sleep_time*4)
+        print("fila: ", queue)
         print("tds: ", float(tds))
         print("minimum tds: ", todays_tds-10)
         print("maximum tds: ", todays_tds+10)
@@ -635,19 +637,19 @@ def adjust_ph(expected_ph):
         print("ideal ph: " , ideal_ph)
 
 
-        if tank_ph < ideal_ph:
+        if tank_ph > ideal_ph:
             print("increasing ph")
             gpio.output(phup_peristaltic_relay_pin, gpio.HIGH)
             sleep(2)
             gpio.output(phup_peristaltic_relay_pin, gpio.LOW)
 
-        if tank_ph > ideal_ph:
+        if tank_ph < ideal_ph:
             print("decreasing ph")
             gpio.output(phdown_peristaltic_relay_pin, gpio.HIGH)
             sleep(2)
             gpio.output(phdown_peristaltic_relay_pin, gpio.LOW)
 
-        print("sleepping 60s at:", datetime.now())
+        print("sleeping 60s at:", datetime.now())
         sleep(60)
         print("waking up")
         tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
@@ -724,7 +726,7 @@ def create_nutritive_solution(todays_nutes):
 
             print("adding floranova bloom")
             gpio.output(bloom_peristaltic_relay_pin, gpio.HIGH)
-            sleep(0.5)
+            sleep(2)
             gpio.output(bloom_peristaltic_relay_pin, gpio.LOW)
 
 
@@ -774,4 +776,4 @@ while True:
     print("000- current week: ", week)
     feed(queue, week)
     print("000- taking a nap at: ", datetime.now())
-    sleep(60*10)
+    sleep(60*60*4)
