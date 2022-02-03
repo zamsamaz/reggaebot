@@ -1,9 +1,9 @@
 {
   "minimum_moisture": "450",
-  "init_date" : "Dec 20 2021  1:00PM",
-  "ideal_ph" : "106",
-  "min_ph" : "103",
-  "max_ph" : "109",
+  "init_date" : "Jan 2 2022  1:00PM",
+  "ideal_ph" : "1.65",
+  "min_ph" : "1.69",
+  "max_ph" : "1.61",
   "tank_capacity" : "10",
   "irrigation_events": "14",
   "nute_type": "floranova"

@@ -13,7 +13,7 @@ class Getters:
         try:
             growchart = pd.read_pickle("greenutils/floranova_growchart.pkl") #test if one of dfs exist
         except IOError:
-            import gh_floranova_grow_chart_raw_data_to_df #creates the dataframes if exception is raised
+            from greenutils import gh_floranova_grow_chart_raw_data_to_df #creates the dataframes if exception is raised
         return pd.read_pickle("greenutils/floranova_growchart.pkl")
 
     def get_nutrient_parameters_by_week(self, week):
