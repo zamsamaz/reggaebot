@@ -335,14 +335,18 @@ def feed(queue, week):
     global phup_peristaltic_relay_pin
     global phdown_peristaltic_relay_pin
 
+    if len(queue) > 0:
+        turn_shaker_on()
+        sleep(900)
+
     for vase in queue:
 
         sleep_time = 10
         counter = 0
         global irrigation_events # of sleep_time duration each
         turn_drainage_on()
-        turn_shaker_on()
-        sleep(sleep_time*4)
+        sleep(sleep_time*5)
+        #adjust_ph(ideal_ph)
         print("fila: ", queue)
         print("tds: ", float(tds))
         print("minimum tds: ", todays_tds-10)
@@ -630,8 +634,8 @@ def adjust_ph(expected_ph):
     turn_shaker_on()
     tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
 
-    while (max_ph <= tank_ph <= min_ph) == False:
-
+    #while (max_ph <= tank_ph <= min_ph) == False:
+    while (tank_ph == ideal_ph) == False:
         print("adjusting ph")
         print("tank ph: " , tank_ph)
         print("ideal ph: " , ideal_ph)
@@ -695,8 +699,21 @@ def create_nutritive_solution(todays_nutes):
 
     print("turning the shaker on and sleeping 30 secs")
     turn_shaker_on()
-    sleep(30)
+    sleep(60)
     tds_list, moisture_list, tank_tds, tank_ph = get_sensor_data()
+
+
+    #########################################################
+    #########################################################
+    #########################################################
+    #########################################################
+    ############## RETIRAR  DO CODIGO EM PROD ###############
+    #########################################################
+    #########################################################
+    #########################################################
+    #########################################################
+    todays_tds = todays_tds/2
+    todays_minimum_tds, todays_maximum_tds = todays_tds-30, todays_tds+30
 
     # as bombas peristalticas tem vazao de 40ml/min com 12v -> 0.666ml/s
     while (float(todays_minimum_tds) <= float(tank_tds) <= float(todays_maximum_tds)) == False:
@@ -765,6 +782,7 @@ def log_event_on_database(event, caller):
 
 
 while True:
+
     #import pdb;pdb.set_trace()
     print("time now: ", datetime.now())
     print("000- checking sensors to see if plants need nutes")
@@ -775,5 +793,7 @@ while True:
     week = get_current_week(init_date)
     print("000- current week: ", week)
     feed(queue, week)
-    print("000- taking a nap at: ", datetime.now())
+    print("000- taking a 4 hours nap at: ", datetime.now())
+    print("000- last fed : ", queue)
+
     sleep(60*60*4)
